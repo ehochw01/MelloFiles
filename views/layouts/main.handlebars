@@ -1,0 +1,111 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/main.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+      integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <title>Music-Rating-App</title>
+  </head>
+
+  <body>
+    <header>
+      <input type="checkbox" name="" id="chk1" />
+      <div class="logo"><h1 style="color: gold ;">Music-Review-app</h1></div>
+      <div class="search-box">
+        <form class="search-form">
+          <input type="text" name="search" id="srch" placeholder="Search" />
+          <button type="submit" id="search-btn"><i
+              class="fa fa-search"
+            ></i></button>
+        </form>
+      </div>
+      <ul>
+        <li><a href="/">Home</a></li>
+
+        <li><a href="#footer">Contact</a></li>
+      {{#if loggedIn}}
+        <li><a href="#" id="logout">Logout</a></li>
+      {{else}}
+        <li><a href="../login">Log In</a></li>
+      {{/if}}
+        <li>
+          <a href="https://twitter.com/jar_jar_binks1?lang=en"><i
+              class="fab fa-twitter"
+            ></i></a>
+          <a href="https://www.facebook.com/CUSEASBootCamp/"><i
+              class="fab fa-facebook"
+            ></i></a>
+          <a href="https://www.instagram.com/?hl=en"><i
+              class="fab fa-instagram"
+            ></i></a>
+        </li>
+      </ul>
+      <div class="menu">
+        <label for="chk1">
+          <i class="fa fa-bars"></i>
+        </label>
+      </div>
+    </header>
+
+    <main>
+      {{{body}}}
+    </main>
+
+    <footer>
+      <div class="footer-content" id="footer">
+        <h3>Music-Review-App</h3>
+        <p>
+          thank you for checking out our site. please be sure to check out our
+          affiliate pages below
+        </p>
+        <ul class="socials">
+          <li>
+            <a href="https://www.facebook.com/CUSEASBootCamp/"><i
+                class="fab fa-facebook"
+              ></i></a>
+          </li>
+          <li>
+            <a
+              href="https://www.linkedin.com/in/eric-hochwald-3686a8b5/"
+            ><i class="fab fa-linkedin-square"></i></a>
+          </li>
+          <li>
+            <a href="https://twitter.com/jar_jar_binks1?lang=en"><i
+                class="fab fa-twitter"
+              ></i></a>
+          </li>
+          <li>
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><i
+                class="fab fa-youtube"
+              ></i></a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          copyright &copy;2022 Music-Review-app. designed by
+          <span>Eric Hochwald</span>
+        </p>
+      </div>
+    </footer>
+    <script src="/js/search.js"></script>
+    {{#if loggedIn}}
+      <script src="/js/logout.js"></script>
+    {{/if}}
+
+  </body>
+
+</html>

@@ -1,0 +1,14 @@
+<link rel="stylesheet" href="./css/homepage.css" />
+{{#each newReleases as |newRelease|}}
+<div class="column">
+  <a href="./artist/{{newRelease.artistID}}">
+    <img src="{{newRelease.albumArtMedium}}" class="card-img-top" alt="..." />
+  </a>
+  <div class="card-body">
+    <p class="card-text">Album Name: {{newRelease.albumTitle}}</p>
+    <p class="card-text">Artist Name: {{newRelease.artistName}}</p>
+    <p class="card-text">Release Date: {{newRelease.releaseDate}}</p>
+  </div>
+
+</div>
+{{/each}}

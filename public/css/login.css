@@ -1,0 +1,22 @@
+.login-card {
+  border: 3px solid black;
+  max-width: 35%;
+  padding: 5px;
+  margin-left: 500px;
+  margin-top: 150px;
+}
+
+.btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 100%;
+  transition: color 0.1s;
+  margin-left: 16px;
+  border: 1px solid black;
+}
+.btn:hover {
+  color: gold;
+}

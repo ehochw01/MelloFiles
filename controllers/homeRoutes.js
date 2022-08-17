@@ -1,0 +1,295 @@
+var SpotifyWebApi = require('spotify-web-api-node');
+const router = require('express').Router();
+const { User, Rating } = require('../models');
+const spotifyAuth = require('../utils/spotifyAuth');
+const { Op } = require("sequelize");
+
+// GET http://localhost:3001/
+router.get('/', spotifyAuth, async (req, res) => {
+  console.log("In the home route");
+  console.log("req.session.loggedIn:", req.session.loggedIn);
+  // get decorative new releases data from spotify and render it
+  try {
+    const spotifyApi = new SpotifyWebApi({
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET
+    });
+    spotifyApi.setAccessToken(req.session.spotify_token);
+    const newReleaseData = await spotifyApi.getNewReleases({ limit :10, country: 'US' });
+    const newReleasesArray = newReleaseData.body.albums.items;
+    const newReleases = [];
+    // sends new releases to main page
+    for (let i = 0; i < newReleasesArray.length; i++) {
+      const newRelease = newReleasesArray[i];
+      const myObj = {
+        albumType: newRelease.album_type,
+        albumTitle: newRelease.name,
+        spotifyUrl: newRelease.external_urls.spotify,
+        artistName: newRelease.artists[0].name,
+        artistID: newRelease.artists[0].id,
+        albumArtBig: newRelease.images[0].url,
+        albumArtMedium: newRelease.images[1].url,
+        albumArtSmall: newRelease.images[2].url,
+        releaseDate: newRelease.release_date,
+        numTracks: newRelease.total_tracks
+      }
+      newReleases.push(myObj);
+    }
+    const reponseObj = {
+      newReleases,
+      loggedIn: req.session.loggedIn ? true : false
+    }
+    res.render('homepage', reponseObj);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+// first do GET http://localhost:3001/api/spotify/search/artist_name to get the artist ID
+// http://localhost:3001/artist/artist_id
+// Receives an artist id
+router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
+  console.log("In the artist route");
+  console.log("req.session.loggedIn:", req.session.loggedIn);
+  try {
+    const spotifyApi = new SpotifyWebApi({
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET
+    });
+     // Save the access token so that it's used in future calls
+    spotifyApi.setAccessToken(req.session.spotify_token);
+    const artistId = req.params.artist_id;
+    // does a GET /v1/artists/{artist_id}/albums request to get album info  
+    const albumData = await spotifyApi.getArtistAlbums(artistId ,{include_groups: 'album', market: 'US', limit:'50'});
+    // also gives artist ID back
+    const albumArray = albumData.body.items;
+    const artistAlbums = [];
+    for (let i = 0; i < albumArray.length; i++) {
+      const album = albumArray[i];
+      const prevAlbum = albumArray[i-1];
+      // for some reason spotify sometimes returns duplicate albums. This should remove this.
+      if ( i > 0 && album.name != prevAlbum.name && album.release_date != prevAlbum.release_date) {
+        const albumID = album.id;
+        // Gets the average rating for each album
+        const scoreData = await Rating.findAll({
+          attributes: ['score'],
+          where: {
+            // Receives a spotify album id
+            album_id: albumID
+          }
+        });
+        let numScores = scoreData.length;
+        var average = null;
+        if (scoreData.length > 0) {
+          var average = getAverageScore(scoreData.map((score) => score.score));
+        } 
+
+        // render the current logged in user's rating if it exists
+        let userRating = false;
+        if (req.session.loggedIn) {
+          // a the logged in user's rating of a current album
+          const userID = req.session.userID;
+          const ratingData = await Rating.findOne({
+            where: {
+              album_id: albumID,
+              user_id: userID
+            }
+          });
+          if(ratingData){
+            userRating = ratingData.get({ plain: true });
+            console.log(userRating);
+          }
+          
+        }
+        const myObj = {
+          albumID: albumID,
+          albumTitle: album.name,
+          artistID: album.artists[0].id,
+          albumArtBig: album.images[0].url,
+          albumArtMedium: album.images[1].url,
+          albumArtSmall: album.images[2].url,
+          releaseDate: album.release_date,
+          averageRating: average,
+          // also return number of votes
+          numRatings: numScores,
+          userRating: userRating
+        }
+        artistAlbums.push(myObj);
+      }
+    }
+
+    // get artist info
+    // Receives a spotify artist_id
+    // does a GET /v1/artists/{id} request to get artist info
+    const artistData = await spotifyApi.getArtist(artistId);
+    spotifyApi.setAccessToken(req.session.spotify_token);
+    const artistID = req.params.artist_id;
+    const spotifyData = await spotifyApi.getArtistRelatedArtists(artistID);
+    let relatedData = spotifyData.body.artists;
+    relatedData = relatedData.slice(0, 5);
+    const relatedArtists = [];
+    for (let i = 0; i < relatedData.length; i++) {
+      const myObj = {
+        artistId: relatedData[i].id,
+        name: relatedData[i].name
+      }
+      relatedArtists.push(myObj);
+    }
+    const artistInfo = {
+      spotifyUrl: artistData.body.external_urls.spotify,
+      genres: artistData.body.genres,
+      name: artistData.body.name,
+      artistImageBig: artistData.body.images[0].url,
+      artistImageMedium: artistData.body.images[1].url,
+      relatedArtists: relatedArtists
+    }
+
+    const responseObj = {
+      artistAlbums: artistAlbums,
+      artistData: artistInfo,
+      loggedIn: req.session.loggedIn ? true : false
+    }
+    console.log(responseObj);
+    // ===========================================================
+    // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
+    // ===========================================================
+    // res.status(200).json(responseObj);
+    res.render('artistPage', responseObj);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+// http://localhost:3001/album/album_id
+router.get('/album/:album_id', spotifyAuth, async (req, res) => {
+  try {
+    const spotifyApi = new SpotifyWebApi({
+      clientId: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    });
+    spotifyApi.setAccessToken(req.session.spotify_token);
+
+    // may need to get album info from spotify again
+    // v1/albums/{id}
+    const albumId = req.params.album_id;
+    const rawAlbumData = await spotifyApi.getAlbum(albumId, { market: 'US' });
+    const albumData = rawAlbumData.body;
+    const trackData = await spotifyApi.getAlbumTracks(albumId);
+    const trackDataArray = trackData.body.items;
+    const trackArray = [];
+    // gather the relevant track info
+    for (let i = 0; i < trackDataArray.length; i++) {
+      track = trackDataArray[i];
+      const myObj = {
+        length: millisToMinutesAndSeconds(track.duration_ms),
+        name: track.name,
+        trackNumber: track.track_number
+      }
+      trackArray.push(myObj);
+    }
+
+    // get the logged in user's review of the album if it exists
+    let userReview = null;
+    if (req.session.loggedIn) {
+      const reviewData = await Rating.findOne({
+        attributes: [['id','rating_id'],'score', 'review'],
+        where: {
+          album_id: albumId,
+          user_id: req.session.userID
+        },
+        include: [{
+          model: User,
+          attributes: [['id','user_id'], 'username']
+        }],
+      });
+      userReview = reviewData.get({ plain: true });
+    }
+
+    console.log("userReview:", userReview);
+
+    const albumInfo = {
+      albumID: albumData.id,
+      albumTitle: albumData.name,
+      spotifyUrl: albumData.external_urls.spotify,
+      artistID: albumData.artists[0].id,
+      albumArtBig: albumData.images[0].url,
+      albumArtMedium: albumData.images[1].url,
+      albumArtSmall: albumData.images[2].url,
+      releaseDate: albumData.release_date,
+      numTracks: albumData.total_tracks,
+    }
+    console.log("albumInfo:", albumInfo);
+
+    // get the reviews for the album
+    // Receives a spotify album id
+    // returns an array of objects with review text, their associated ratings, and usernames who wrote them
+    const reviewData = await Rating.findAll({
+      attributes: [['id','rating_id'],'score', 'review'],
+      where: {
+        album_id: req.params.album_id,   
+        // only gets rating objects with reviews
+        review: {
+          [Op.ne]: null
+        }   
+      },
+      include: [{
+        model: User,
+        attributes: [['id','user_id'], 'username']
+      }],
+    });
+
+    const reviews = reviewData.map(review => review.get({plain: true}));
+
+    const responseObj = {
+      albumInfo: albumInfo,
+      tracks: trackArray,
+      reviews: reviews,
+      loggedIn: req.session.loggedIn ? true : false,
+      userReview: userReview
+    }
+
+    // ===========================================================
+    // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
+    // ===========================================================
+    // res.status(200).json(responseObj);
+    res.render('albumPage', responseObj);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+function millisToMinutesAndSeconds(millis) {
+  var minutes = Math.floor(millis / 60000);
+  var seconds = ((millis % 60000) / 1000).toFixed(0);
+  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+}
+
+function getAverageScore(scores) {
+  let total = 0;
+  for(let i = 0; i < scores.length; i++) {
+    total += scores[i];
+  }
+  const rawAvg = total / scores.length;
+  // returns the average score of that album
+  return Math.round(rawAvg * 10) / 10;
+
+}
+
+router.get('/login', (req, res) => {
+  // if we go to login and we are already logged in we get redirected to home
+  if (req.session.loggedIn) {
+    res.redirect('/');
+    return;
+  }
+
+  res.render('login', {
+    loggedIn: req.session.loggedIn ? true : false
+  });
+});
+
+router.get('')
+
+module.exports = router;

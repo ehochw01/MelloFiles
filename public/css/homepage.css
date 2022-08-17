@@ -1,0 +1,32 @@
+main {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-column-gap: 30px;
+  grid-row-gap: 15px;
+  margin-left: 100px;
+}
+
+.column {
+  float: left;
+  margin-top: 100px;
+}
+.card-body {
+  background-color: rgb(128, 128, 128);
+  max-width: 300px;
+  cursor: pointer;
+}
+.card-body:hover {
+  box-shadow: 0 0 10px gold;
+}
+
+img {
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+img:hover {
+  outline: none;
+  border-color: #9ecaed;
+  box-shadow: 0 0 10px gold;
+}
