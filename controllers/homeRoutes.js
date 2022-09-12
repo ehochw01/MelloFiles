@@ -15,31 +15,38 @@ router.get('/', spotifyAuth, async (req, res) => {
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET
     });
     spotifyApi.setAccessToken(req.session.spotify_token);
-    const newReleaseData = await spotifyApi.getNewReleases({ limit :10, country: 'US' });
+    const newReleaseData = await spotifyApi.getNewReleases({ limit :20, country: 'US' });
     const newReleasesArray = newReleaseData.body.albums.items;
     const newReleases = [];
     // sends new releases to main page
-    for (let i = 0; i < newReleasesArray.length; i++) {
+    let i = 0;
+    while (newReleases.length < 9) {
       const newRelease = newReleasesArray[i];
-      const myObj = {
-        albumType: newRelease.album_type,
-        albumTitle: newRelease.name,
-        spotifyUrl: newRelease.external_urls.spotify,
-        artistName: newRelease.artists[0].name,
-        artistID: newRelease.artists[0].id,
-        albumArtBig: newRelease.images[0].url,
-        albumArtMedium: newRelease.images[1].url,
-        albumArtSmall: newRelease.images[2].url,
-        releaseDate: newRelease.release_date,
-        numTracks: newRelease.total_tracks
+      if (newRelease.album_type == "album") {
+        const myObj = {
+          albumID: newRelease.id,
+          albumTitle: newRelease.name,
+          spotifyUrl: newRelease.external_urls.spotify,
+          artistName: newRelease.artists[0].name,
+          artistID: newRelease.artists[0].id,
+          albumArtMedium: newRelease.images[1].url,
+          albumArtSmall: newRelease.images[2].url,
+          releaseDate: newRelease.release_date,
+          numTracks: newRelease.total_tracks
+        }
+        newReleases.push(myObj);
       }
-      newReleases.push(myObj);
+      i++;
     }
-    const reponseObj = {
+    const responseObj = {
       newReleases,
       loggedIn: req.session.loggedIn ? true : false
     }
-    res.render('homepage', reponseObj);
+    // ===========================================================
+    // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
+    // ===========================================================
+    // res.status(200).json(responseObj);
+    res.render('homepage', responseObj);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

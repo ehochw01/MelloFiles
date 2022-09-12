@@ -1,4 +1,4 @@
-# Music Rating App
+# MelloFiles
 * [Description](#description)
 * [Usage](#usage)
 * [Technologies](#technologies)
@@ -7,7 +7,7 @@
     
 ## Description and Usage
 ```
-Music Rating App
+MelloFiles
 
 This is a music rating app where a user can search an artists name, and see rating and review data for their albums. 
 The album and artist data are obtained using the Spotify Web Api.
@@ -27,9 +27,7 @@ A user can then click on one of the albums and go to the artist page where they 
 - MySql
 - Sequelize
 ```
-## Screenshot
-![Screenshot of Search Results](/public/images/search-page.png)
 
 ## Link 
-[Heroku Deployment of App](https://nameless-wave-46056.herokuapp.com/)
+[Heroku Deployment of App](https://mellofiles.herokuapp.com/)
 
