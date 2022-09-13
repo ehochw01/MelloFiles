@@ -20,7 +20,7 @@ router.get('/', spotifyAuth, async (req, res) => {
     const newReleases = [];
     // sends new releases to main page
     let i = 0;
-    while (newReleases.length < 9) {
+    while (newReleases.length < 9 && i < 20) {
       const newRelease = newReleasesArray[i];
       if (newRelease.album_type == "album") {
         const myObj = {

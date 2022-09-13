@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="/css/artistpage.css" />
+{{!-- <h1>{{artistData.name}}</h1> --}}
+{{#each artistAlbums as |album|}}
+<div class="column">
+  <a href="/album/{{album.albumID}}">
+  <img src="{{album.albumArtMedium}}" class="card-img-top" alt="..." />
+  </a>
+  <div class="card-body">
+    <p class="card-text">{{album.albumTitle}}</p>
+    <p class="card-text">Release Date: {{album.releaseDate}}</p>
+    {{#if album.averageRating}}
+    <p class="card-text">Average Rating: {{album.averageRating}}</p>
+    {{/if}}
+    <p class="card-text">{{album.numRatings}} Votes</p>
+    <label for="pet-select">Choose a rating:</label>
+
+    <select name="rating" class="album-rating" data-albumID="{{album.albumID}}" data-aristID="{{album.artistID}}"
+      {{#if album.userRating}}
+      data-ratingid="{{album.userRating.id}}" data-userscore="{{album.userRating.score}}"
+      {{/if}}
+      >
+      <option value="">Choose a rating:</option>
+      <option value="1">1 - Unbearable</option>  
+      <option value="2">2 - Awful</option>
+      <option value="3">3 - Very Poor</option>
+      <option value="4">4 - Poor</option>
+      <option value="5">5 - Average</option>
+      <option value="6">6 - Good</option>
+      <option value="7">7 - Great</option>
+      <option value="8">8 - Excellent</option>
+      <option value="9">9 - Superb</option>
+      <option value="10">10 - Classic</option>
+    </select>
+  </div>
+</div>
+{{/each}}
+
+<script src="/js/rating.js"></script>
