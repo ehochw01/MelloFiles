@@ -1,42 +1,60 @@
-<link rel="stylesheet" href="./css/login.css" />
-<section>
-  <div class="row justify-space-between-md">
-    <div class="login-card">
-      <h2 class="page-title">Login</h2>
-      <form class="form login-form">
-        <div class="form-group">
-          <label for="email-login">Email:</label>
-          <input class="form-input" type="text" id="email-login" />
+<section class="vh-100 bg-light">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+          <div class="card shadow-2-strong" style="border-radius: 1rem;">
+            <div class="card-body p-5 text-center">
+  
+              <h3 class="mb-5">Log In</h3>
+
+              <form id="login-form">
+                <div class="form-outline mb-2">
+                  <input type="email" id="email-login" class="form-control form-control-lg" />
+                  <label class="form-label" for="email-login">Email</label>
+                </div>
+              
+                <div class="form-outline mb-2">
+                  <input type="password" id="password-login" class="form-control form-control-lg" />
+                  <label class="form-label" for="password-login">Password</label>
+                </div>
+    
+                <button class="btn btn-primary btn-lg btn-block" type="submit">Log In</button>
+              </form>
+              <hr class="my-4">
+  
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="password-login">Password:</label>
-          <input class="form-input" type="password" id="password-login" />
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-2-strong" style="border-radius: 1rem;">
+              <div class="card-body p-5 text-center">
+    
+                <h3 class="mb-5">Sign Up</h3>
+
+                <form id="signup-form">
+                  <div class="form-outline mb-2">
+                    <input type="username" id="username-signup" class="form-control form-control-lg" />
+                    <label class="form-label" for="username-signup">User Name</label>
+                  </div>
+      
+                  <div class="form-outline mb-2">
+                    <input type="email" id="email-signup" class="form-control form-control-lg" />
+                    <label class="form-label" for="email-signup">Email</label>
+                  </div>
+      
+                  <div class="form-outline mb-2">
+                    <input type="password" id="password-signup" class="form-control form-control-lg" />
+                    <label class="form-label" for="password-signup">Password</label>
+                  </div>
+                  <button class="btn btn-primary btn-lg btn-block" type="submit">Sign Up</button>
+                </form>
+                <hr class="my-4">
+    
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <button class="btn btn-primary" type="submit">login</button>
-        </div>
-      </form>
-    </div>
-    <div class="login-card">
-      <h2 class="page-title">Signup</h2>
-      <form class="form signup-form">
-        <div class="form-group">
-          <label for="username-signup">Username:</label>
-          <input class="form-input" type="text" id="username-signup" />
-        </div>
-        <div class="form-group">
-          <label for="email-signup">Email:</label>
-          <input class="form-input" type="text" id="email-signup" />
-        </div>
-        <div class="form-group">
-          <label for="password-signup">Password:</label>
-          <input class="form-input" type="password" id="password-signup" />
-        </div>
-        <div class="form-group">
-          <button class="btn btn-primary" type="submit">signup</button>
-        </div>
-      </form>
     </div>
   </div>
 </section>
 <script src="/js/login.js"></script>
+

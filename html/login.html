@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Login</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link href="https://use.fontawesome.com/releases/v5.0.4/css/all.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="../public/revamp-css/home.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+          <a class="navbar-brand" href="/">MelloFiles</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <form class="form-inline mt-2 mt-md-0 col-6">
+              <input class="form-control mr-sm-2 col-8" type="text" placeholder="Search Artists" aria-label="Search">
+              <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="search-btn">Search</button>
+            </form>
+            <ul class="navbar-nav ml-auto mr-2">
+              <li class="nav-item active">
+                <a class="nav-link" href="/">Home</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="#footer">Contact</a>
+              </li>
+            <!-- {{#if loggedIn}} -->
+              <!-- <li class="nav-item">
+                <a class="nav-link" href="#" id="logout">Logout</a>
+              </li> -->
+            <!-- {{else}} -->
+              <li class="nav-item active">
+                <a class="nav-link" href="../login">Log In</a>
+              </li>
+            <!-- {{/if}} -->
+            </ul>
+          </div>
+        </nav>
+    </header>
+      <main role="main">
+        <section class="vh-100 bg-light">
+            <div class="container py-5 h-100">
+              <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                  <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+          
+                      <h3 class="mb-5">Log In</h3>
+          
+                      <div class="form-outline mb-2">
+                        <input type="email" id="email-login" class="form-control form-control-lg" />
+                        <label class="form-label" for="email-login">Email</label>
+                      </div>
+          
+                      <div class="form-outline mb-2">
+                        <input type="password" id="password-login" class="form-control form-control-lg" />
+                        <label class="form-label" for="password-login">Password</label>
+                      </div>
+          
+                      <button class="btn btn-primary btn-lg btn-block" type="submit">Log In</button>
+          
+                      <hr class="my-4">
+          
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                    <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                      <div class="card-body p-5 text-center">
+            
+                        <h3 class="mb-5">Sign Up</h3>
+  
+                        <div class="form-outline mb-2">
+                          <input type="username" id="username-signup" class="form-control form-control-lg" />
+                          <label class="form-label" for="username-signup">User Name</label>
+                        </div>
+            
+                        <div class="form-outline mb-2">
+                          <input type="email" id="email-signup" class="form-control form-control-lg" />
+                          <label class="form-label" for="email-signup">Email</label>
+                        </div>
+            
+                        <div class="form-outline mb-2">
+                          <input type="password" id="password-signup" class="form-control form-control-lg" />
+                          <label class="form-label" for="password-signup">Password</label>
+                        </div>
+            
+                        <button class="btn btn-primary btn-lg btn-block" type="submit">Sign Up</button>
+            
+                        <hr class="my-4">
+            
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </section>
+      </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-center text-white">
+      <!-- Grid container -->
+      <div class="container p-2" id="footer">
+
+      <!-- Section: Text -->
+        <section class="mb-3">
+          <p>
+              This site is dedicated to music lovers who want to discover new music and share their taste with others. Thank you for checking it out. Please check out the links below to contact me or see my socials.
+          </p>
+        </section>
+
+        <!-- Section: Text -->
+        <!-- Section: Social media -->
+        <section class="mb-3">
+          
+          <!-- Email -->
+          <a class="btn btn-outline-light btn-floating m-1" href="mailto:hochwalderic@gmail.com" target="_blank" role="button"
+            ><i class="fa fa-envelope"></i
+          ></a>
+          <!-- Linkedin -->
+          <a class="btn btn-outline-light btn-floating m-1" href="https://www.linkedin.com/in/eric-hochwald-3686a8b5/" target="_blank" role="button"
+            ><i class="fab fa-linkedin-in"></i
+          ></a>
+
+          <!-- Github -->
+          <a class="btn btn-outline-light btn-floating m-1" target="_blank" href="https://github.com/ehochw01" role="button"
+            ><i class="fab fa-github"></i
+          ></a>
+          <!-- Instagram -->
+          <a class="btn btn-outline-light btn-floating m-1" target="_blank" href="https://www.instagram.com/moon_machine_music/" role="button"
+            ><i class="fab fa-instagram"></i
+          ></a>
+        </section>
+        <!-- Section: Social media -->
+        
+        <p>
+          <a href="#">Back to top</a>
+        </p>
+
+      </div>
+      <!-- Grid container -->
+
+      <!-- Copyright -->
+      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        © 2022 Copyright: MelloFiles. Designed by Eric Hochwald.
+      <!-- Copyright -->
+    </footer>
+    <!-- Footer -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+  </body>
+</html>

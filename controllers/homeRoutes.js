@@ -161,8 +161,8 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     // ===========================================================
     // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
     // ===========================================================
-    // res.status(200).json(responseObj);
-    res.render('artistPage', responseObj);
+    res.status(200).json(responseObj);
+    // res.render('artistPage', responseObj);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

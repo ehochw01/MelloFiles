@@ -1,4 +1,6 @@
+console.log("in login.js");
 const loginFormHandler = async (event) => {
+  console.log("In loginFormHandler");
   event.preventDefault();
   const email = document.querySelector("#email-login").value.trim();
   const password = document.querySelector("#password-login").value.trim();
@@ -19,10 +21,13 @@ const loginFormHandler = async (event) => {
 };
 
 const signupFormHandler = async (event) => {
+  console.log("In signupFormHandler");
   event.preventDefault();
   const username = document.querySelector("#username-signup").value.trim();
   const email = document.querySelector("#email-signup").value.trim();
   const password = document.querySelector("#password-signup").value.trim();
+
+  console.log("username:", username, "email:", email, "password:", password);
 
   if (username && email && password) {
     const response = await fetch("/api/users", {
@@ -44,9 +49,9 @@ const signupFormHandler = async (event) => {
 };
 
 document
-  .querySelector(".login-form")
+  .querySelector("#login-form")
   .addEventListener("submit", loginFormHandler);
 
 document
-  .querySelector(".signup-form")
+  .querySelector("#signup-form")
   .addEventListener("submit", signupFormHandler);
