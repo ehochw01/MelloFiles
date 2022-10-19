@@ -71,6 +71,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     const albumData = await spotifyApi.getArtistAlbums(artistId ,{include_groups: 'album', market: 'US', limit:'50'});
     // also gives artist ID back
     const albumArray = albumData.body.items;
+    console.log("albumArray", albumArray);
     const artistAlbums = [];
     for (let i = 0; i < albumArray.length; i++) {
       const album = albumArray[i];
@@ -79,6 +80,9 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
       if ( i > 0 && album.name != prevAlbum.name && album.release_date != prevAlbum.release_date) {
         const albumID = album.id;
         // Gets the average rating for each album
+        const release_year = album.release_date_precision === 'year'
+          ? album.release_date
+          : album.release_date.split('-')[0];
         const scoreData = await Rating.findAll({
           attributes: ['score'],
           where: {
@@ -113,10 +117,11 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
           albumID: albumID,
           albumTitle: album.name,
           artistID: album.artists[0].id,
-          albumArtBig: album.images[0].url,
-          albumArtMedium: album.images[1].url,
-          albumArtSmall: album.images[2].url,
-          releaseDate: album.release_date,
+          albumArt: album.images[0].url,
+          // albumArtMedium: album.images[1].url,
+          // albumArtSmall: album.images[2].url,
+          year: release_year,
+          spotifyUrl: album.external_urls.spotify,
           averageRating: average,
           // also return number of votes
           numRatings: numScores,
@@ -132,6 +137,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     const artistData = await spotifyApi.getArtist(artistId);
     spotifyApi.setAccessToken(req.session.spotify_token);
     const artistID = req.params.artist_id;
+
     const spotifyData = await spotifyApi.getArtistRelatedArtists(artistID);
     let relatedData = spotifyData.body.artists;
     relatedData = relatedData.slice(0, 5);
@@ -143,26 +149,21 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
       }
       relatedArtists.push(myObj);
     }
-    const artistInfo = {
-      spotifyUrl: artistData.body.external_urls.spotify,
-      genres: artistData.body.genres,
-      name: artistData.body.name,
-      artistImageBig: artistData.body.images[0].url,
-      artistImageMedium: artistData.body.images[1].url,
-      relatedArtists: relatedArtists
-    }
 
     const responseObj = {
-      artistAlbums: artistAlbums,
-      artistData: artistInfo,
+      name: artistData.body.name,
+      genres: artistData.body.genres,
+      artistImage: artistData.body.images[0].url,
+      spotifyUrl: artistData.body.external_urls.spotify,
+      relatedArtists: relatedArtists,
+      albums: artistAlbums,
       loggedIn: req.session.loggedIn ? true : false
     }
-    console.log(responseObj);
     // ===========================================================
     // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
     // ===========================================================
-    res.status(200).json(responseObj);
-    // res.render('artistPage', responseObj);
+    // res.status(200).json(responseObj);
+    res.render('artistPage', responseObj);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

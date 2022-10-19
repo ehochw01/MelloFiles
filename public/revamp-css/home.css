@@ -37,4 +37,12 @@
   }
   
   .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
+
+  #album-art:hover {
+    opacity: 0.7;
+  }
+  
+  #bottom-buttons {
+    margin-top: 12px;
+  }
   

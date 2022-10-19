@@ -38,7 +38,7 @@ const ratingHandler = async (event) => {
   if (resJson == "Log In") {
     document.location.replace("/login");
   } else if (response.ok) {
-    document.location.replace(`/artist/${artist_id}`);
+    location.reload();
   } else {
     alert("Failed to save rating");
   } 
