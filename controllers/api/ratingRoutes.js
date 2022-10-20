@@ -107,6 +107,3 @@ router.put('/:id', withAuth, async (req, res) => {
 
 
 module.exports = router;
-
-// this may need to be done in another file, using spotify routes
-

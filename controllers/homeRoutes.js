@@ -71,85 +71,86 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     const albumData = await spotifyApi.getArtistAlbums(artistId ,{include_groups: 'album', market: 'US', limit:'50'});
     // also gives artist ID back
     const albumDataArray = albumData.body.items;
-    // hashing each album title to later check for potential album duplicates
-    const albumArray = [];
 
+    // hashing each album title to check for potential album duplicates
     // attempts to filter out duplicate albums including deluxe editions, remasters, commentary, etc
     const albumHash = {};
-    for (let i = albumDataArray.length-1; i >=0 ; i--) {
+    for (let i = 0; i < albumDataArray.length; i++) {
       const album = albumDataArray[i];
+      // console.log("album:", album);
       let name = album.name.toLowerCase();
       if (!name.includes("commentary")) {
         name = album.name.replace("The ",'');
         name = name.replace("?",'');
         name = name.split(" [")[0];
         name = name.split(" (")[0];
-        if (albumHash[name] !== true) {
+        // if an album doens't match a key in the hashmap, add the album to the hashmap
+        if (albumHash[name] === undefined) {
           var temp = album.name.split(" [")[0];
           album.name = temp.split(" (")[0];
-          albumArray.push(album);
+          // albumArray.push(album);
+          albumHash[name] = album;
+        // if a version of the album already exists in the hash map, keep the one with the least amount of tracks (it will likely not include bonus tracks which we don't want) 
+        } else if (album.total_tracks < albumHash[name].total_tracks) {
+          albumHash[name] = album;
         }
-        albumHash[name] = true;
       }
     }
-
-    // console.log("albumArray", albumArray);
+    const albumArray = Object.values(albumHash);
     const artistAlbums = [];
-    for (let i = albumArray.length-1; i >= 0; i--) {
+    for (let i = 0; i < albumArray.length; i++) {
       const album = albumArray[i];
       // isValidAlbum attempts to filter out remasters, deluxe editions, etc that duplicate to albums already on the list
-      // if (isValidAlbum(album)) {
-        const albumID = album.id;
-        // Gets the average rating for each album
-        const release_year = album.release_date_precision === 'year'
-          ? album.release_date
-          : album.release_date.split('-')[0];
-        const scoreData = await Rating.findAll({
-          attributes: ['score'],
+      const albumID = album.id;
+      // Gets the average rating for each album
+      const release_year = album.release_date_precision === 'year'
+        ? album.release_date
+        : album.release_date.split('-')[0];
+      const scoreData = await Rating.findAll({
+        attributes: ['score'],
+        where: {
+          // Receives a spotify album id
+          album_id: albumID
+        }
+      });
+      let numScores = scoreData.length;
+      var average = null;
+      if (scoreData.length > 0) {
+        var average = getAverageScore(scoreData.map((score) => score.score));
+      } 
+
+      // render the current logged in user's rating if it exists
+      let userRating = false;
+      if (req.session.loggedIn) {
+        // a the logged in user's rating of a current album
+        const userID = req.session.userID;
+        const ratingData = await Rating.findOne({
           where: {
-            // Receives a spotify album id
-            album_id: albumID
+            album_id: albumID,
+            user_id: userID
           }
         });
-        let numScores = scoreData.length;
-        var average = null;
-        if (scoreData.length > 0) {
-          var average = getAverageScore(scoreData.map((score) => score.score));
-        } 
-
-        // render the current logged in user's rating if it exists
-        let userRating = false;
-        if (req.session.loggedIn) {
-          // a the logged in user's rating of a current album
-          const userID = req.session.userID;
-          const ratingData = await Rating.findOne({
-            where: {
-              album_id: albumID,
-              user_id: userID
-            }
-          });
-          if(ratingData){
-            userRating = ratingData.get({ plain: true });
-            console.log(userRating);
-          }
-          
+        if(ratingData){
+          userRating = ratingData.get({ plain: true });
+          // console.log(userRating);
         }
-        const myObj = {
-          albumID: albumID,
-          albumTitle: album.name,
-          artistID: album.artists[0].id,
-          albumArt: album.images[0].url,
-          // albumArtMedium: album.images[1].url,
-          // albumArtSmall: album.images[2].url,
-          year: release_year,
-          spotifyUrl: album.external_urls.spotify,
-          averageRating: average,
-          // also return number of votes
-          numRatings: numScores,
-          userRating: userRating
-        }
-        artistAlbums.push(myObj);
-      // }
+        
+      }
+      const myObj = {
+        albumID: albumID,
+        albumTitle: album.name,
+        artistID: album.artists[0].id,
+        albumArt: album.images[0].url,
+        // albumArtMedium: album.images[1].url,
+        // albumArtSmall: album.images[2].url,
+        year: release_year,
+        spotifyUrl: album.external_urls.spotify,
+        averageRating: average,
+        // also return number of votes
+        numRatings: numScores,
+        userRating: userRating
+      }
+      artistAlbums.push(myObj);
     }
 
     // get artist info
@@ -206,6 +207,7 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     const albumId = req.params.album_id;
     const rawAlbumData = await spotifyApi.getAlbum(albumId, { market: 'US' });
     const albumData = rawAlbumData.body;
+    return res.status(200).json(albumData);
     const trackData = await spotifyApi.getAlbumTracks(albumId);
     const trackDataArray = trackData.body.items;
     const trackArray = [];
