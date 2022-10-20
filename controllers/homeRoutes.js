@@ -77,7 +77,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
       const album = albumArray[i];
       const prevAlbum = albumArray[i-1];
       // for some reason spotify sometimes returns duplicate albums. This should remove this.
-      if ( i > 0 && album.name != prevAlbum.name && album.release_date != prevAlbum.release_date) {
+      // if ( i > 0 && album.name != prevAlbum.name || album.release_date != prevAlbum.release_date) {
         const albumID = album.id;
         // Gets the average rating for each album
         const release_year = album.release_date_precision === 'year'
@@ -128,7 +128,8 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
           userRating: userRating
         }
         artistAlbums.push(myObj);
-      }
+      // }
+      console.log("artistAlbums:", artistAlbums);
     }
 
     // get artist info
