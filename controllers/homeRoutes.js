@@ -70,14 +70,35 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     // does a GET /v1/artists/{artist_id}/albums request to get album info  
     const albumData = await spotifyApi.getArtistAlbums(artistId ,{include_groups: 'album', market: 'US', limit:'50'});
     // also gives artist ID back
-    const albumArray = albumData.body.items;
-    console.log("albumArray", albumArray);
+    const albumDataArray = albumData.body.items;
+    // hashing each album title to later check for potential album duplicates
+    const albumArray = [];
+
+    // attempts to filter out duplicate albums including deluxe editions, remasters, commentary, etc
+    const albumHash = {};
+    for (let i = albumDataArray.length-1; i >=0 ; i--) {
+      const album = albumDataArray[i];
+      let name = album.name.toLowerCase();
+      if (!name.includes("commentary")) {
+        name = album.name.replace("The ",'');
+        name = name.replace("?",'');
+        name = name.split(" [")[0];
+        name = name.split(" (")[0];
+        if (albumHash[name] !== true) {
+          var temp = album.name.split(" [")[0];
+          album.name = temp.split(" (")[0];
+          albumArray.push(album);
+        }
+        albumHash[name] = true;
+      }
+    }
+
+    // console.log("albumArray", albumArray);
     const artistAlbums = [];
-    for (let i = 0; i < albumArray.length; i++) {
+    for (let i = albumArray.length-1; i >= 0; i--) {
       const album = albumArray[i];
-      const prevAlbum = albumArray[i-1];
-      // for some reason spotify sometimes returns duplicate albums. This should remove this.
-      // if ( i > 0 && album.name != prevAlbum.name || album.release_date != prevAlbum.release_date) {
+      // isValidAlbum attempts to filter out remasters, deluxe editions, etc that duplicate to albums already on the list
+      // if (isValidAlbum(album)) {
         const albumID = album.id;
         // Gets the average rating for each album
         const release_year = album.release_date_precision === 'year'
@@ -129,7 +150,6 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
         }
         artistAlbums.push(myObj);
       // }
-      console.log("artistAlbums:", artistAlbums);
     }
 
     // get artist info
@@ -172,6 +192,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
 });
 
 // http://localhost:3001/album/album_id
+// album page route
 router.get('/album/:album_id', spotifyAuth, async (req, res) => {
   try {
     const spotifyApi = new SpotifyWebApi({
@@ -262,8 +283,8 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     // ===========================================================
     // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
     // ===========================================================
-    // res.status(200).json(responseObj);
-    res.render('albumPage', responseObj);
+    res.status(200).json(responseObj);
+    // res.render('albumPage', responseObj);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -284,6 +305,20 @@ function getAverageScore(scores) {
   const rawAvg = total / scores.length;
   // returns the average score of that album
   return Math.round(rawAvg * 10) / 10;
+}
+
+function isValidAlbum(album) {
+  let name = album.name.toLowerCase();
+  const strArr = name.split(" (");
+  console.log(strArr);
+  if (strArr.length == 1) {
+    return true;
+  }
+
+  if (albumHash[strArr[0]] === true) {
+    return false;
+  }
+  return true;
 
 }
 
