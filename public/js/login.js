@@ -12,8 +12,15 @@ const loginFormHandler = async (event) => {
       headers: { "Content-Type": "application/json" },
     });
 
+    const pendingRating = JSON.parse(sessionStorage.getItem("pendingRating"));
+    console.log("pendingRating:", pendingRating);
+    sessionStorage.removeItem("pendingRating");
     if (response.ok) {
-      document.location.replace("/");
+      if (pendingRating !== null) {
+        document.location.replace(`/artist/${pendingRating.artist_id}#${pendingRating.album_id}`);
+      } else {
+        document.location.replace("/");
+      }
     } else {
       alert("Failed to log in.");
     }

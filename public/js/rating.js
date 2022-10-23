@@ -19,15 +19,18 @@ const ratingHandler = async (event) => {
   }
 
   let body = JSON.stringify({ album_id, artist_id, score });
-  let response;
+  console.log("body:", body);
+  let response, existing_rating;
   if (typeof(ratingSelect.dataset.ratingid) != "undefined") {
     const ratingID = ratingSelect.dataset.ratingid;
+    existing_rating = true;
     response = await fetch(`/api/reviews/${ratingID}`, {
       method: "PUT",
       body: body,
       headers: { "Content-Type": "application/json" },
     });
   } else {
+    existing_rating = false;
     response = await fetch("/api/reviews/", {
       method: "POST",
       body: body,
@@ -36,6 +39,11 @@ const ratingHandler = async (event) => {
   }
   const resJson = await response.json(); 
   if (resJson == "Log In") {
+    const rating = {
+      artist_id: artist_id,
+      album_id: album_id
+    };
+    sessionStorage.setItem("pendingRating", JSON.stringify(rating));
     document.location.replace("/login");
   } else if (response.ok) {
     location.reload();

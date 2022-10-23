@@ -1,67 +1,23 @@
-<link rel="stylesheet" href="../css/albumreviews.css" />
-<div class="album-info">
-  {{! Info from Spotify }}
-  <h1>{{albumInfo.albumTitle}}</h1>
-  <img
-    src="{{albumInfo.albumArtMedium}}"
-    alt="{{albumInfo.albumTitle}}"
-    id="albumart"
-  />
-  {{#each reviews as |review|}}
-  <div id="rating-box">
-    <span id="user">{{review.user.username}}:</span>
-    <span id="album-rating">{{review.score}}/10</span>
-  </div>
-  <div>
-    <p>{{review.review}}</p>
-  </div>
-  {{/each}}
-</div>
-{{! Info from reviews_db  }}
-
-{{! review form goes here }}
-{{#if loggedIn}}
-<section>
-  <h2 class="leave-your-review">Leave your own review!</h2>
-  <div class="container">
-    <form id="review-form">
-      <div class="row">
-        <div class="col-25">
-          <label for="subject"></label>
-        </div>
-        <div class="col-25">
-          <select name="rating" id="rating" class="album-rating" data-albumID="{{albumInfo.albumID}}" data-aristID="{{albumInfo.artistID}}"
-            {{#if userReview}}
-            data-ratingid="{{userReview.rating_id}}" data-userscore="{{userReview.score}}"
-            {{/if}}
-            >
-            <option value="">Rating:</option>
-            <option value="1">1 - Unbearable</option>  
-            <option value="2">2 - Awful</option>
-            <option value="3">3 - Very Poor</option>
-            <option value="4">4 - Poor</option>
-            <option value="5">5 - Average</option>
-            <option value="6">6 - Good</option>
-            <option value="7">7 - Great</option>
-            <option value="8">8 - Excellent</option>
-            <option value="9">9 - Superb</option>
-            <option value="10">10 - Classic</option>
-          </select>
-        </div>
-        <textarea
-          id="review-text"
-          name="review-text"
-          placeholder="Write your review here..."
-          style="height:200px"
-        >{{#if userReview.review}}{{userReview.review}}{{/if}}</textarea>
-
+<section class="container">
+  <div class="card mb-3" style="margin-top: 70px;">
+    <div class="row">
+      <div class="col-md-6">
+        <img class="card-img" src="{{albumInfo.albumArt}}" alt="Album Art">
       </div>
-      <div class="row">
-        <input type="submit" value="Submit" />
+      <div class="col-md-6">
+        <div class="card-body">
+          <h1 class="card-title">{{albumInfo.albumTitle}}</h1>
+          <h6 class="card-subtitle mb-2">By {{#each artists as |artist|}}{{#if @last}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}.</a>{{else}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}</a>, {{/if}}{{/each}}</h6>
+          <p class="card-text">Released {{albumInfo.releaseDate}} by {{albumInfo.label}}</p>
+          <h6 class="card-subtitle mb-2">Track Listing</h6>
+          <ol>
+            {{#each tracks as |track|}}
+            <li><a href="{{track.spotifyUrl}}" target="_blank" class="text-dark">{{track.name}}</a> 
+            ({{track.length}})</li>
+            {{/each}}
+        </ol>
+          </div>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
-</section>
-<script src="/js/review.js"></script>
-{{/if}}
-

@@ -72,40 +72,42 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     // also gives artist ID back
     const albumDataArray = albumData.body.items;
 
+
     // hashing each album title to check for potential album duplicates
     // attempts to filter out duplicate albums including deluxe editions, remasters, commentary, etc
     const albumHash = {};
+
+    // console.log(albumDataArray.map(x => x.release_date));
+    
     for (let i = 0; i < albumDataArray.length; i++) {
       const album = albumDataArray[i];
       // console.log("album:", album);
       let name = album.name.toLowerCase();
-      if (!name.includes("commentary")) {
+      if (!name.includes("commentary") && !name.includes("karaoke")) {
         name = album.name.replace("The ",'');
         name = name.replace("?",'');
-        name = name.split(" [")[0];
-        name = name.split(" (")[0];
+        name = cleanAlbumName(name);
         // if an album doens't match a key in the hashmap, add the album to the hashmap
         if (albumHash[name] === undefined) {
-          var temp = album.name.split(" [")[0];
-          album.name = temp.split(" (")[0];
-          // albumArray.push(album);
+          album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         // if a version of the album already exists in the hash map, keep the one with the least amount of tracks (it will likely not include bonus tracks which we don't want) 
         } else if (album.total_tracks < albumHash[name].total_tracks) {
+          album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         }
       }
     }
-    const albumArray = Object.values(albumHash);
+    // console.log(albumHash);
+    // now we have a filtered array of albums. Sort it by release year
+    const albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(b)) - parseInt(getReleaseYear(a)));
     const artistAlbums = [];
     for (let i = 0; i < albumArray.length; i++) {
       const album = albumArray[i];
       // isValidAlbum attempts to filter out remasters, deluxe editions, etc that duplicate to albums already on the list
       const albumID = album.id;
       // Gets the average rating for each album
-      const release_year = album.release_date_precision === 'year'
-        ? album.release_date
-        : album.release_date.split('-')[0];
+      const release_year = getReleaseYear(album);
       const scoreData = await Rating.findAll({
         attributes: ['score'],
         where: {
@@ -141,8 +143,6 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
         albumTitle: album.name,
         artistID: album.artists[0].id,
         albumArt: album.images[0].url,
-        // albumArtMedium: album.images[1].url,
-        // albumArtSmall: album.images[2].url,
         year: release_year,
         spotifyUrl: album.external_urls.spotify,
         averageRating: average,
@@ -207,17 +207,18 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     const albumId = req.params.album_id;
     const rawAlbumData = await spotifyApi.getAlbum(albumId, { market: 'US' });
     const albumData = rawAlbumData.body;
-    return res.status(200).json(albumData);
-    const trackData = await spotifyApi.getAlbumTracks(albumId);
-    const trackDataArray = trackData.body.items;
+    const trackDataArray = albumData.tracks.items;
+    // res.status(200).json(albumData);
+    // console.log("trackDataArray:", albumData.tracks);
     const trackArray = [];
     // gather the relevant track info
     for (let i = 0; i < trackDataArray.length; i++) {
       track = trackDataArray[i];
       const myObj = {
         length: millisToMinutesAndSeconds(track.duration_ms),
-        name: track.name,
-        trackNumber: track.track_number
+        name: cleanTrackName(track.name),
+        trackNumber: track.track_number,
+        spotifyUrl: track.external_urls.spotify
       }
       trackArray.push(myObj);
     }
@@ -236,24 +237,31 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
           attributes: [['id','user_id'], 'username']
         }],
       });
-      userReview = reviewData.get({ plain: true });
+      if (reviewData !== null) {
+        userReview = reviewData.get({ plain: true });
+      } 
     }
 
-    console.log("userReview:", userReview);
+    const artistData = [];
+
+    albumData.artists.forEach(artist => {
+      let myObj = {};
+      myObj.name = artist.name;
+      myObj.id = artist.id;
+      artistData.push(myObj);
+    });
 
     const albumInfo = {
       albumID: albumData.id,
       albumTitle: albumData.name,
       spotifyUrl: albumData.external_urls.spotify,
       artistID: albumData.artists[0].id,
-      albumArtBig: albumData.images[0].url,
+      albumArt: albumData.images[0].url,
       albumArtMedium: albumData.images[1].url,
-      albumArtSmall: albumData.images[2].url,
-      releaseDate: albumData.release_date,
+      releaseDate: new Date(albumData.release_date).toLocaleDateString(),
       numTracks: albumData.total_tracks,
+      label: albumData.label
     }
-    console.log("albumInfo:", albumInfo);
-
     // get the reviews for the album
     // Receives a spotify album id
     // returns an array of objects with review text, their associated ratings, and usernames who wrote them
@@ -276,6 +284,7 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
 
     const responseObj = {
       albumInfo: albumInfo,
+      artists: artistData,
       tracks: trackArray,
       reviews: reviews,
       loggedIn: req.session.loggedIn ? true : false,
@@ -285,8 +294,8 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     // ===========================================================
     // NOTE!!!!! CHANGE TO RES.RENDER WHEN TESTING WITH HANDLEBARS
     // ===========================================================
-    res.status(200).json(responseObj);
-    // res.render('albumPage', responseObj);
+    // res.status(200).json(responseObj);
+    res.render('albumPage', responseObj);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -309,19 +318,21 @@ function getAverageScore(scores) {
   return Math.round(rawAvg * 10) / 10;
 }
 
-function isValidAlbum(album) {
-  let name = album.name.toLowerCase();
-  const strArr = name.split(" (");
-  console.log(strArr);
-  if (strArr.length == 1) {
-    return true;
-  }
+function cleanTrackName(track) {
+  track = track.replace(" (Remastered)", "");
+  return track;
+}
 
-  if (albumHash[strArr[0]] === true) {
-    return false;
-  }
-  return true;
+function cleanAlbumName(name) {
+  var temp = name.split(" [")[0];
+  name = temp.split(" (")[0];
+  return name;
+}
 
+function getReleaseYear(album) {
+  return album.release_date_precision === 'year'
+        ? album.release_date
+        : album.release_date.split('-')[0];
 }
 
 router.get('/login', (req, res) => {
