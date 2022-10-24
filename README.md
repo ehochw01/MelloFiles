@@ -1,10 +1,10 @@
 # MelloFiles
 * [Description](#description)
 * [Usage](#usage)
+* [Link](#link)
 * [Technologies](#technologies)
-* [Screenshot](#screenshot)
-* [Link](link)
-    
+* [Screenshots](#screenshots)
+
 ## Description
 ```
 MelloFiles
@@ -32,6 +32,10 @@ A user can then click on one of the albums and go to the artist page where they 
 
 There are many hyperlinks scatterred on the pages. On the artist page, the user can open the artist's spotify page, as well as the spotify pages for each of their albums if they want to listen to one of the albums. Every artist page also has links to the artist pages of related artists so that the user can potentially discover new artists. 
 ```
+
+## Link 
+[Heroku Deployment of App](https://mellofiles.herokuapp.com/)
+
 ## Technologies
 ```
 - Node.js
@@ -43,6 +47,22 @@ There are many hyperlinks scatterred on the pages. On the artist page, the user 
 - Spotify API
 ```
 
-## Link 
-[Heroku Deployment of App](https://mellofiles.herokuapp.com/)
+## Sceenshots
+Home Page:
+
+![Home Page](./public/images/homepage.png)
+
+Login Page:
+
+![Login Page](./public/images/loginpage.png)
+
+Artist Page:
+
+![Artist Page](./public/images/artistpage.png)
+
+Album Page:
+
+![Album Page](./public/images/albumpage.png)
+
+
 
