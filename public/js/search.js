@@ -8,6 +8,8 @@ const searchHandler = async (event) => {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
+
+      console.log("response:", response);
   
       if (response.ok) {
         const artistId = await response.json();

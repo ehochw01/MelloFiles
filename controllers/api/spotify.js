@@ -12,9 +12,22 @@ router.get('/search/:artist', spotifyAuth, async (req, res) => {
     });
      // Save the access token so that it's used in future calls
     spotifyApi.setAccessToken(req.session.spotify_token);
+    const searchString = req.params.artist;
     // hard coded to pick most popular result
-    const searchArtistData = await spotifyApi.searchArtists(req.params.artist, {limit: 1});
-    const artistId = searchArtistData.body.artists.items[0].id;
+    const searchArtistData = await spotifyApi.searchArtists(searchString, {limit: 10});
+    const artists = searchArtistData.body.artists.items;
+    console.log("artists", artists);
+    console.log("Does the name match?", artists[1].name == searchString);
+    var artistId = null;
+    for (let i=0; i < artists.length; i++) {
+      if (artists[i].name == searchString) {
+        artistId = artists[i].id;
+      }
+    }
+    if (artistId === null) {
+      artistId = artists[0];
+    }
+
     res.status(200).json(artistId);
   } catch (err) {
     console.log(err);
