@@ -1,6 +1,9 @@
 :root {
     --jumbotron-padding-y: 3rem;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   
   .jumbotron {
     padding-top: var(--jumbotron-padding-y);
@@ -36,8 +39,6 @@
     margin-bottom: .25rem;
   }
   
-  .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
-
   #album-art:hover {
     opacity: 0.8;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
