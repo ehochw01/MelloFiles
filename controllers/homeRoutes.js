@@ -108,18 +108,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
       const albumID = album.id;
       // Gets the average rating for each album
       const release_year = getReleaseYear(album);
-      const scoreData = await Rating.findAll({
-        attributes: ['score'],
-        where: {
-          // Receives a spotify album id
-          album_id: albumID
-        }
-      });
-      let numScores = scoreData.length;
-      var average = null;
-      if (scoreData.length > 0) {
-        var average = getAverageScore(scoreData.map((score) => score.score));
-      } 
+      const rating = await getAlbumRating(albumID, 1);
 
       // render the current logged in user's rating if it exists
       let userRating = false;
@@ -145,9 +134,9 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
         albumArt: album.images[0].url,
         year: release_year,
         spotifyUrl: album.external_urls.spotify,
-        averageRating: average,
+        averageRating: rating.average,
         // also return number of votes
-        numRatings: numScores,
+        numRatings: rating.numVotes,
         userRating: userRating
       }
       artistAlbums.push(myObj);
@@ -206,6 +195,7 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     // v1/albums/{id}
     const albumId = req.params.album_id;
     const rawAlbumData = await spotifyApi.getAlbum(albumId, { market: 'US' });
+    const rating = await getAlbumRating(albumId, 2);
     const albumData = rawAlbumData.body;
     const trackDataArray = albumData.tracks.items;
     // res.status(200).json(albumData);
@@ -253,7 +243,7 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
 
     const albumInfo = {
       albumID: albumData.id,
-      albumTitle: albumData.name,
+      albumTitle: cleanAlbumName(albumData.name),
       spotifyUrl: albumData.external_urls.spotify,
       artistID: albumData.artists[0].id,
       albumArt: albumData.images[0].url,
@@ -281,9 +271,11 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     });
 
     const reviews = reviewData.map(review => review.get({plain: true}));
-
+    console.log('reviews:', reviews);
     const responseObj = {
       albumInfo: albumInfo,
+      averageRating: rating.average,
+      numVotes: rating.numVotes,
       artists: artistData,
       tracks: trackArray,
       reviews: reviews,
@@ -308,18 +300,38 @@ function millisToMinutesAndSeconds(millis) {
   return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
 }
 
-function getAverageScore(scores) {
+async function getAlbumRating(albumID, decPlace) {
+  const scoreData = await Rating.findAll({
+    attributes: ['score'],
+    where: {
+      // Receives a spotify album id
+      album_id: albumID
+    }
+  });
+  let numScores = scoreData.length;
+  var average = null;
+  if (scoreData.length > 0) {
+    average = getAverageScore(scoreData.map((score) => score.score), decPlace);
+  } 
+  return {
+    numVotes: numScores,
+    average: average
+  }
+}
+
+function getAverageScore(scores, decPlace) {
   let total = 0;
   for(let i = 0; i < scores.length; i++) {
     total += scores[i];
   }
   const rawAvg = total / scores.length;
   // returns the average score of that album
-  return Math.round(rawAvg * 10) / 10;
+  return Math.round(rawAvg * (10*decPlace)) / (10*decPlace);
 }
 
 function cleanTrackName(track) {
   track = track.replace(" (Remastered)", "");
+  track = track.split(" - Remaster")[0];
   return track;
 }
 

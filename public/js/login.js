@@ -19,7 +19,7 @@ const loginFormHandler = async (event) => {
       if (pendingRating !== null) {
         document.location.replace(`/artist/${pendingRating.artist_id}#${pendingRating.album_id}`);
       } else {
-        document.location.replace("/");
+        window.location=document.referrer;
       }
     } else {
       alert("Failed to log in.");

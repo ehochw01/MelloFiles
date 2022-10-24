@@ -7,17 +7,70 @@
       <div class="col-md-6">
         <div class="card-body">
           <h1 class="card-title">{{albumInfo.albumTitle}}</h1>
-          <h6 class="card-subtitle mb-2">By {{#each artists as |artist|}}{{#if @last}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}.</a>{{else}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}</a>, {{/if}}{{/each}}</h6>
-          <p class="card-text">Released {{albumInfo.releaseDate}} by {{albumInfo.label}}</p>
+          <h6 class="card-subtitle mb-2">By {{#each artists as |artist|}}{{#if @last}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}</a>{{else}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}</a>, {{/if}}{{/each}}</h6>
+          <p class="card-text">{{#if averageRating}}<h3>{{averageRating}}/10</h3> from {{/if}}{{numVotes}} ratings</p>
+          <p class="card-text">Released {{albumInfo.releaseDate}} by {{albumInfo.label}}<p>
           <h6 class="card-subtitle mb-2">Track Listing</h6>
           <ol>
             {{#each tracks as |track|}}
             <li><a href="{{track.spotifyUrl}}" target="_blank" class="text-dark">{{track.name}}</a> 
             ({{track.length}})</li>
             {{/each}}
-        </ol>
+          </ol>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                   <a href={{#if loggedIn}}"#write-review"{{else}}"/login"{{/if}}class="btn btn-primary sticky-top">Write a Review</a>
+                  <a href="{{albumInfo.spotifyUrl}}" target="_blank" class="btn btn-outline-success">Open in <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-spotify" viewBox="0 0 16 16">
+                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
+                  </svg></a>
+                </div>
+              </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</section>
+<section class="container" id="user-reviews">
+  {{#each reviews as |review|}}
+  <div class="mt-4">
+    <h6>{{review.user.username}}: {{review.score}}/10</h6>
+  </div>
+  <div>
+    <p>{{review.review}}</p>
+  </div>
+  {{/each}}
+</div>
+</section>
+{{#if loggedIn}}
+<section class="container" id="write-review">
+    <form class="mb-4 mt-3" id="review-form">
+      <h2 class="leave-your-review">Leave your own review!</h2>
+      <div class="form-group">
+        <select name="rating" id="rating" class="album-rating btn btn-secondary" data-albumID="{{albumInfo.albumID}}" data-aristID="{{albumInfo.artistID}}"
+          {{#if userReview}}
+            data-ratingid="{{userReview.rating_id}}" data-userscore="{{userReview.score}}"
+            {{/if}}
+          >
+            <option value="">Choose a rating:</option>
+            <option value="10">10 - Classic</option>
+            <option value="9">9 - Superb</option>
+            <option value="8">8 - Excellent</option>
+            <option value="7">7 - Great</option>
+            <option value="6">6 - Good</option>
+            <option value="5">5 - Average</option>
+            <option value="4">4 - Poor</option>
+            <option value="3">3 - Very Poor</option>
+            <option value="2">2 - Awful</option>
+            <option value="1">1 - Unbearable</option>  
+        </select>
+      </div>
+      <div class="form-group">
+        <textarea class="form-control" id="review-text" name="review-text"placeholder="Write your review here..." rows="8">{{#if userReview.review}}{{userReview.review}}{{/if}}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</section>
+<script src="/js/review.js"></script>
+{{/if}}
