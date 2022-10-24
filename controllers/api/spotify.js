@@ -16,8 +16,8 @@ router.get('/search/:artist', spotifyAuth, async (req, res) => {
     // hard coded to pick most popular result
     const searchArtistData = await spotifyApi.searchArtists(searchString, {limit: 10});
     const artists = searchArtistData.body.artists.items;
-    console.log("artists", artists);
-    console.log("Does the name match?", artists[1].name == searchString);
+    // console.log("artists", artists);
+    // console.log("Does the name match?", artists[1].name == searchString);
     var artistId = artists[0].id;
     // if there is a tie for popularity
     if (artists[0].popularity == artists[1].popularity) {
