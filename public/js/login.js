@@ -13,7 +13,6 @@ const loginFormHandler = async (event) => {
     });
 
     const pendingRating = JSON.parse(sessionStorage.getItem("pendingRating"));
-    console.log("pendingRating:", pendingRating);
     sessionStorage.removeItem("pendingRating");
     if (response.ok) {
       if (pendingRating !== null) {
@@ -34,8 +33,6 @@ const signupFormHandler = async (event) => {
   const email = document.querySelector("#email-signup").value.trim();
   const password = document.querySelector("#password-signup").value.trim();
 
-  console.log("username:", username, "email:", email, "password:", password);
-
   if (username && email && password) {
     const response = await fetch("/api/users", {
       method: "POST",
@@ -43,11 +40,17 @@ const signupFormHandler = async (event) => {
       headers: { "Content-Type": "application/json" },
     });
     const resJson = await response.json(); 
+    const pendingRating = JSON.parse(sessionStorage.getItem("pendingRating"));
+    sessionStorage.removeItem("pendingRating");
     if (response.ok) {
-      document.location.replace("/");
+      if (pendingRating !== null) {
+        document.location.replace(`/artist/${pendingRating.artist_id}#${pendingRating.album_id}`);
+      } else {
+        window.location=document.referrer;
+      }
     } else {
       if (resJson.errors[0].type == "Validation error") {
-        alert("Make sure that your email is correctly formatted and that your password is at elast 6 characters long");
+        alert("Make sure that your email is correctly formatted and that your password is at least 6 characters long");
       } else {
         alert("Failed to sign up.");
       }
