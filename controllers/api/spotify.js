@@ -18,16 +18,16 @@ router.get('/search/:artist', spotifyAuth, async (req, res) => {
     const artists = searchArtistData.body.artists.items;
     console.log("artists", artists);
     console.log("Does the name match?", artists[1].name == searchString);
-    var artistId = null;
-    for (let i=0; i < artists.length; i++) {
-      if (artists[i].name == searchString) {
-        artistId = artists[i].id;
+    var artistId = artists[0].id;
+    // if there is a tie for popularity
+    if (artists[0].popularity == artists[1].popularity) {
+      for (let i=0; i < artists.length; i++) {
+        if (artists[i].name == searchString) {
+          artistId = artists[i].id;
+        }
       }
-    }
-    if (artistId === null) {
-      artistId = artists[0];
-    }
 
+    } 
     res.status(200).json(artistId);
   } catch (err) {
     console.log(err);
