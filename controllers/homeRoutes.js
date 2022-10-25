@@ -83,7 +83,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
       const album = albumDataArray[i];
       // console.log("album:", album);
       let name = album.name.toLowerCase();
-      if (!name.includes("commentary") && !name.includes("karaoke")) {
+      if (!name.includes("commentary") && !name.includes("karaoke") && !name.includes("(disk 2)")) {
         name = album.name.replace("The ",'');
         name = name.replace("?",'');
         name = cleanAlbumName(name);
