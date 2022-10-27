@@ -25,9 +25,10 @@ the user to the associated artist page.
 Each artist has an artist page. The artist page has metadata about the artists, as well as cards 
 of each of their albums which include the average user rating and number of votes for each album.
 
-Each album has an album page which the user can get to by clicking on the album art of said album on
-the associated artist page. The album page shows metadata about the album as well as all the user
-reviews for that album. This page is where a user would leave a review of their own for an album.
+Each album has an album page which the user can get to by clicking on the album art of said album
+on the associated artist page. The album page shows metadata about the album as well as all the
+user reviews for that album. This page is where a user would leave a review of their own for an
+album.
  
 ```
 
