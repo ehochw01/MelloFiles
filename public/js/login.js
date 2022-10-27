@@ -14,7 +14,6 @@ const loginFormHandler = async (event) => {
     const resJson = await response.json(); 
     const pendingRating = JSON.parse(sessionStorage.getItem("pendingRating"));
     sessionStorage.removeItem("pendingRating");
-    console.log("resJson:", resJson);
     if (response.ok) {
       if (pendingRating !== null) {
         document.location.replace(`/artist/${pendingRating.artist_id}#${pendingRating.album_id}`);

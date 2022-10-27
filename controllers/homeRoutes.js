@@ -77,7 +77,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     // attempts to filter out duplicate albums including deluxe editions, remasters, commentary, etc
     const albumHash = {};
 
-    // console.log(albumDataArray.map(x => x.release_date));
+    // res.status(200).json(albumDataArray);
     
     for (let i = 0; i < albumDataArray.length; i++) {
       const album = albumDataArray[i];
@@ -89,11 +89,11 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
         name = cleanAlbumName(name);
         // if an album doens't match a key in the hashmap, add the album to the hashmap
         if (albumHash[name] === undefined) {
-          album.name = cleanAlbumName(album.name);
+          // album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         // if a version of the album already exists in the hash map, keep the one with the least amount of tracks (it will likely not include bonus tracks which we don't want) 
         } else if (album.total_tracks < albumHash[name].total_tracks) {
-          album.name = cleanAlbumName(album.name);
+          // album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         }
       }
