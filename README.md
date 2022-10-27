@@ -3,6 +3,7 @@
 * [Usage](#usage)
 * [Link](#link)
 * [Technologies](#technologies)
+* [Medium Article](#medium-article)
 * [Screenshots](#screenshots)
 
 ## Description
@@ -73,6 +74,11 @@ artists so that the user can potentially discover new artists.
 - Bootstrap
 - Spotify API
 ```
+
+## Medium Article
+
+I wrote a medium article about how this application handles the Client Credentials
+authorization with the Spotify API. You can read it [here](https://medium.com/@hochwalderic/express-middleware-that-handles-client-credentials-authorization-to-the-spotify-api-84c9a88ccf2f).
 
 ## Sceenshots
 Home Page:
