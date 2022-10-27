@@ -15,8 +15,8 @@ their taste with others. The album and artist data are obtained using the Spotif
 The deployed app can be viewed at mellofiles.herokuapp.com.
 
 This project stemmed from a group project where I implemented the backend, and my teammates
-implemented the backend. However, this is my version of the project called MelloFiles where I re-wrote
-the front-end and implemented some new features.
+implemented the backend. However, this is my version of the project called MelloFiles where I 
+re-wrote the front-end and implemented some new features.
 
 The home page renders news releases from spotify's api to inform the user about new released music.
 There is a search bar in the navbar for users to search for an artist on each page. This will bring
@@ -33,24 +33,25 @@ reviews for that album. This page is where a user would leave a review of their 
 
 ## Usage
 ```
-Users have the option of logging in, or surfing the site without signing up or logging in. If they are
-logged in, they can leave a rating or review. If Users are not logged in, they can still look at
-ratings and reviews that other users have left. 
+Users have the option of logging in, or surfing the site without signing up or logging in. If 
+they are logged in, they can leave a rating or review. If Users are not logged in, they can still
+look at ratings and reviews that other users have left. 
 
 The home page renders news releases from spotify's api to inform the user about new released music.
-If the user wants to see or leave ratings and reviews, they have to search for an artist in the search bar which brings them to the artist page. For now, the search is a "I'm feeling lucky", as there isn't
-a such results page yet. The user will be directed to the artist page of the most popular search
-result for the search string given from Spotify.
+If the user wants to see or leave ratings and reviews, they have to search for an artist in the
+search bar which brings them to the artist page. For now, the search is a "I'm feeling lucky", as
+there isn't a such results page yet. The user will be directed to the artist page of the most popular
+ search result for the search string given from Spotify.
 
-The artist page has all of an artist's albums from spotify, and the average reviews for that album in
-our database. Users are able to rate albums from this page. If the user is not logged in and attempt
-to leave a rating, they will be redirected to the login page. Then after loggin in or signing up, they
-will be redirected back to the page they were previously on.
+The artist page has all of an artist's albums from spotify, and the average reviews for that album
+in our database. Users are able to rate albums from this page. If the user is not logged in and
+attempt to leave a rating, they will be redirected to the login page. Then after loggin in or
+signing up, they will be redirected back to the page they were previously on.
 
-A user can then click on one of the albums and go to the artist page where they can read other users'
-reviews for that album, and leave their own if they are logged in. The form to leave a review and the
-select button to choose a rating will only render if the user is logged in. If the user wants to leave
-a review, they must also leave a rating. 
+A user can then click on one of the albums and go to the artist page where they can read other 
+users' reviews for that album, and leave their own if they are logged in. The form to leave a 
+review and the select button to choose a rating will only render if the user is logged in. 
+If the user wants to leave a review, they must also leave a rating. 
 
 There are many hyperlinks scatterred on the pages. On the artist page, the user can open the artist's
 spotify page, as well as the spotify pages for each of their albums if they want to listen to one of
