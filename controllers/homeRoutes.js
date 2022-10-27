@@ -89,11 +89,11 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
         name = cleanAlbumName(name);
         // if an album doens't match a key in the hashmap, add the album to the hashmap
         if (albumHash[name] === undefined) {
-          // album.name = cleanAlbumName(album.name);
+          album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         // if a version of the album already exists in the hash map, keep the one with the least amount of tracks (it will likely not include bonus tracks which we don't want) 
         } else if (album.total_tracks < albumHash[name].total_tracks) {
-          // album.name = cleanAlbumName(album.name);
+          album.name = cleanAlbumName(album.name);
           albumHash[name] = album;
         }
       }
