@@ -37,7 +37,21 @@
     <h6>{{review.user.username}}: {{review.score}}/10</h6>
   </div>
   <div>
+    {{#if review.currentUser}}
+    <div class="row">
+        <div class="col-10">
+          <p id="current-user-review">{{review.review}}</p>
+        </div>
+        <div class="col-2">
+          <div class="btn-group float-righ">
+            <button type="button" id="edit-review" class="btn btn-sm btn-secondary float-right">Edit</button>
+            <button type="button" id="delete-review" data-ratingID="{{review.rating_id}}" class="btn btn-sm btn-danger float-right ml-2">Delete</button>
+          </div>
+        </div>
+    </div>
+    {{else}}
     <p>{{review.review}}</p>
+    {{/if}}
   </div>
   {{/each}}
 </div>
@@ -66,9 +80,9 @@
         </select>
       </div>
       <div class="form-group">
-        <textarea class="form-control" id="review-text" name="review-text"placeholder="Write your review here..." rows="8">{{#if userReview.review}}{{userReview.review}}{{/if}}</textarea>
+        <textarea class="form-control" id="review-text" name="review-text"placeholder="Write your review here..." rows="8"></textarea>
       </div>
-      <button type="submit" class="btn btn-primary">{{#if userReview.review}}Edit Review{{else}}Submit Review{{/if}}</button>
+      <button type="submit" class="btn btn-primary">Submit Review</button>
     </form>
   </div>
 </section>

@@ -1,5 +1,7 @@
 const ratingSelect = document.getElementById('rating');
-const reviewForm = document.getElementById('review-form')
+const reviewForm = document.getElementById('review-form');
+const deleteBtn = document.getElementById('delete-review');
+const editBtn = document.getElementById('edit-review');
 
 if (typeof(ratingSelect.dataset.ratingid) != "undefined") {
   const score = ratingSelect.dataset.userscore;
@@ -41,10 +43,58 @@ const reviewHandler = async (event) => {
   if (resJson == "Log In") {
     document.location.replace("/login");
   } else if (response.ok) {
-    location.reload();;
+    location.reload();
   } else {
     alert("Failed to save rating");
   } 
 };
+
+const deleteHandler = async (event) => {
+  event.preventDefault();
+  const ratingID = ratingSelect.getAttribute("data-ratingID");
+  response = await fetch(`/api/reviews/${ratingID}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resJson = await response.json(); 
+  if (resJson == "Log In") {
+    document.location.replace("/login");
+  } else if (response.ok) {
+    location.reload();
+  } else {
+    console.log(resJson);
+    alert("Failed to delete rating");
+  }
+};
+
+if (deleteBtn !== null) {
+  deleteBtn.onclick= async ()=> {
+    const ratingID = ratingSelect.getAttribute("data-ratingID");
+    console.log("ratingID:", ratingID);
+    const response = await fetch(`/api/reviews/${ratingID}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    const resJson = await response.json(); 
+    if (resJson == "Log In") {
+      document.location.replace("/login");
+    } else if (response.ok) {
+      location.reload();
+    } else {
+      console.log(resJson);
+      alert("Failed to delete rating");
+    }
+  };
+}
+
+if (editBtn !== null) {
+  editBtn.onclick = () => {
+    const currentUserReview = document.getElementById("current-user-review");
+    const text = document.getElementById("review-text").value = currentUserReview.innerHTML;
+    reviewForm.scrollIntoView();
+    console.log("currentUserReview:", currentUserReview.innerHTML);
+    console.log("reviewForm:", reviewForm);
+  };
+}
 
 reviewForm.addEventListener("submit", reviewHandler);

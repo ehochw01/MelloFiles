@@ -198,8 +198,6 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
     const rating = await getAlbumRating(albumId, 2);
     const albumData = rawAlbumData.body;
     const trackDataArray = albumData.tracks.items;
-    // res.status(200).json(albumData);
-    // console.log("trackDataArray:", albumData.tracks);
     const trackArray = [];
     // gather the relevant track info
     for (let i = 0; i < trackDataArray.length; i++) {
@@ -231,6 +229,8 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
         userReview = reviewData.get({ plain: true });
       } 
     }
+
+    console.log("userReview:", userReview);
 
     const artistData = [];
 
@@ -270,8 +270,17 @@ router.get('/album/:album_id', spotifyAuth, async (req, res) => {
       }],
     });
 
-    const reviews = reviewData.map(review => review.get({plain: true}));
-    console.log('reviews:', reviews);
+    // const reviews = reviewData.map(review => review.get({plain: true}));
+    const reviews = [];
+    for (let i=0; i < reviewData.length; i++){
+      const review = reviewData[i].get({plain: true})
+      console.log(`review ${i}`,review);
+      if (review.user.user_id == req.session.userID) {
+        review["currentUser"] = true;
+      }
+      reviews.push(review);
+    }
+
     const responseObj = {
       albumInfo: albumInfo,
       averageRating: rating.average,

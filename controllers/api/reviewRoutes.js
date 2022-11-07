@@ -116,15 +116,12 @@ router.put('/:id', withAuth, async (req, res) => {
 // user needs to be logged in
 // setting a review to null
 // needs withAuth middleware to reroute to the login page if the user isn't logged in
-router.delete('/:rating_id', withAuth, async (req, res) => {
+router.delete('/:rating_id', async (req, res) => {
   // delete one product by its `id` value
   try {
     const reviewData = await Rating.update({ review: null }, {
       where: {
-        id: rating_id,
-        review: {
-          [Op.ne]: null
-        }   
+        id: req.params.rating_id,
       }
     });
     if (!reviewData) {
