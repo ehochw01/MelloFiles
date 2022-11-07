@@ -62,7 +62,6 @@ const deleteHandler = async (event) => {
   } else if (response.ok) {
     location.reload();
   } else {
-    console.log(resJson);
     alert("Failed to delete rating");
   }
 };
@@ -70,7 +69,6 @@ const deleteHandler = async (event) => {
 if (deleteBtn !== null) {
   deleteBtn.onclick= async ()=> {
     const ratingID = ratingSelect.getAttribute("data-ratingID");
-    console.log("ratingID:", ratingID);
     const response = await fetch(`/api/reviews/${ratingID}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -81,7 +79,6 @@ if (deleteBtn !== null) {
     } else if (response.ok) {
       location.reload();
     } else {
-      console.log(resJson);
       alert("Failed to delete rating");
     }
   };
@@ -92,8 +89,6 @@ if (editBtn !== null) {
     const currentUserReview = document.getElementById("current-user-review");
     const text = document.getElementById("review-text").value = currentUserReview.innerHTML;
     reviewForm.scrollIntoView();
-    console.log("currentUserReview:", currentUserReview.innerHTML);
-    console.log("reviewForm:", reviewForm);
   };
 }
 
