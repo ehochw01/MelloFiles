@@ -67,19 +67,21 @@ const deleteHandler = async (event) => {
 };
 
 if (deleteBtn !== null) {
-  deleteBtn.onclick= async ()=> {
-    const ratingID = ratingSelect.getAttribute("data-ratingID");
-    const response = await fetch(`/api/reviews/${ratingID}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
-    const resJson = await response.json(); 
-    if (resJson == "Log In") {
-      document.location.replace("/login");
-    } else if (response.ok) {
-      location.reload();
-    } else {
-      alert("Failed to delete rating");
+  deleteBtn.onclick = async ()=> {
+    if(confirm("Are you sure you want to delete your review?")) {
+      const ratingID = ratingSelect.getAttribute("data-ratingID");
+      const response = await fetch(`/api/reviews/${ratingID}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const resJson = await response.json(); 
+      if (resJson == "Log In") {
+        document.location.replace("/login");
+      } else if (response.ok) {
+        location.reload();
+      } else {
+        alert("Failed to delete rating");
+      }
     }
   };
 }
