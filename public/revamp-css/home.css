@@ -49,12 +49,18 @@
 
   }
   
-  @media only screen and (max-width: 780px) {
+  @media only screen and (max-width: 767px) {
     #edit-delete {
       padding-left: 1rem!important;
     }
     #current-user-review {
       margin-bottom: 0.5rem!important;
+    }
+    #search-bar {
+      max-width: 100%;
+    }
+    .navbar-nav .nav-item {
+      display: inline-block;
     }
   }
  

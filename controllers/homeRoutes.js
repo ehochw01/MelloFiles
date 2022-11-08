@@ -56,7 +56,7 @@ router.get('/', spotifyAuth, async (req, res) => {
 // first do GET http://localhost:3001/api/spotify/search/artist_name to get the artist ID
 // http://localhost:3001/artist/artist_id
 // Receives an artist id
-router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
+router.get('/artist/:artist_id/:order', spotifyAuth, async (req, res) => {
   console.log("In the artist route");
   console.log("req.session.loggedIn:", req.session.loggedIn);
   try {
@@ -100,7 +100,13 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
     }
     // console.log(albumHash);
     // now we have a filtered array of albums. Sort it by release year
-    const albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(b)) - parseInt(getReleaseYear(a)));
+    var albumArray = [];
+    if (req.params.order === null || req.params.order == "desc") {
+      albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(b)) - parseInt(getReleaseYear(a)));
+    } else {
+      albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(a)) - parseInt(getReleaseYear(b)));
+    }
+    
     const artistAlbums = [];
     for (let i = 0; i < albumArray.length; i++) {
       const album = albumArray[i];
@@ -163,6 +169,7 @@ router.get('/artist/:artist_id', spotifyAuth, async (req, res) => {
 
     const responseObj = {
       name: artistData.body.name,
+      artistID: req.params.artist_id,
       genres: artistData.body.genres,
       artistImage: (artistData.body.images.length > 0) ? artistData.body.images[0].url : null,
       spotifyUrl: artistData.body.external_urls.spotify,

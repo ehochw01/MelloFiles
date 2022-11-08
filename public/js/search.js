@@ -13,7 +13,7 @@ const searchHandler = async (event) => {
   
       if (response.ok) {
         const artistId = await response.json();
-        document.location.replace(`/artist/${artistId}`);
+        document.location.replace(`/artist/${artistId}/desc`);
       } else {
         alert("Cannot find artist");
       }
