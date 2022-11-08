@@ -13,7 +13,8 @@ const searchHandler = async (event) => {
   
       if (response.ok) {
         const artistId = await response.json();
-        document.location.replace(`/artist/${artistId}/desc`);
+        const order = localStorage.getItem("albumOrder") || "desc";
+        document.location.replace(`/artist/${artistId}/${order}`);
       } else {
         alert("Cannot find artist");
       }

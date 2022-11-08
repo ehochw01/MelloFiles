@@ -1,9 +1,19 @@
 const artistLinks = document.querySelectorAll('.artist-link');
 var order = localStorage.getItem("albumOrder") || "desc";
-console.log("order:", order);
 for(let i=0; i < artistLinks.length; i++) {
   artistLinks[i].href += order;
-  console.log(artistLinks[i]);
+}
+const ascend = document.getElementById("ascending");
+const descend = document.getElementById("descending");
+console.log(window.location);
+if (order == "desc") {
+  console.log("currently descending");
+  ascend.href = window.location.origin + window.location.pathname.replace("/desc", "/asc") + "#albums";
+  descend.href = "#albums";
+} else {
+  console.log("currently ascending");
+  descend.href = window.location.origin + window.location.pathname.replace("/asc", "/desc") + "#albums";
+  ascend.href = "#albums";
 }
 
 // checks if the user has existing scores for any of the rendered albums
@@ -67,21 +77,11 @@ for (let i = 0; i < elements.length; i++) {
 
 const setOrder = async (e) => {
   const link = e.currentTarget;
-  console.log("window.location:", window.location);
-  var path = window.location.pathname
   if (link.id == "ascending") {
     localStorage.setItem("albumOrder", "asc");
-    if (path.includes("/desc")) {
-      path = window.location.pathname.replace("desc", "asc")
-    }
   } else {
     localStorage.setItem("albumOrder", "desc");
-    if (path.includes("/asc")) {
-      path = window.location.pathname.replace("asc", "desc")
-    }
-  }
-  path += "#albums"
-  document.location.replace(window.location.origin + path)
+  } 
 }
 
 document.getElementById("ascending").addEventListener("click", setOrder, false);
