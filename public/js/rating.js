@@ -1,3 +1,11 @@
+const artistLinks = document.querySelectorAll('.artist-link');
+var order = localStorage.getItem("albumOrder") || "desc";
+console.log("order:", order);
+for(let i=0; i < artistLinks.length; i++) {
+  artistLinks[i].href += order;
+  console.log(artistLinks[i]);
+}
+
 // checks if the user has existing scores for any of the rendered albums
 const userRatings = document.querySelectorAll('[data-ratingid]');
 
@@ -56,3 +64,25 @@ var elements = document.getElementsByClassName("album-rating");
 for (let i = 0; i < elements.length; i++) {
   elements[i].addEventListener("change", ratingHandler, false);
 }
+
+const setOrder = async (e) => {
+  const link = e.currentTarget;
+  console.log("window.location:", window.location);
+  var path = window.location.pathname
+  if (link.id == "ascending") {
+    localStorage.setItem("albumOrder", "asc");
+    if (path.includes("/desc")) {
+      path = window.location.pathname.replace("desc", "asc")
+    }
+  } else {
+    localStorage.setItem("albumOrder", "desc");
+    if (path.includes("/asc")) {
+      path = window.location.pathname.replace("asc", "desc")
+    }
+  }
+  path += "#albums"
+  document.location.replace(window.location.origin + path)
+}
+
+document.getElementById("ascending").addEventListener("click", setOrder, false);
+document.getElementById("descending").addEventListener("click", setOrder, false);

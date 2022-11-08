@@ -1,3 +1,9 @@
+const artistLinks = document.querySelectorAll('.artist-link');
+var order = localStorage.getItem("albumOrder") || "desc";
+for(let i=0; i < artistLinks.length; i++) {
+  artistLinks[i].href += order;
+}
+
 var i = 0;
 var txt = '"Writing about music is like dancing about architecture" - Unknown'; /* The text */
 var speed = 50; /* The speed/duration of the effect in milliseconds */

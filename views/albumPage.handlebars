@@ -7,7 +7,7 @@
       <div class="col-md-6">
         <div class="card-body">
           <h1 class="card-title">{{albumInfo.albumTitle}}</h1>
-          <h6 class="card-subtitle mb-2">By {{#each artists as |artist|}}{{#if @last}}<a href="/artist/{{artist.id}}/desc" class="text-dark">{{artist.name}}</a>{{else}}<a href="/artist/{{artist.id}}" class="text-dark">{{artist.name}}</a>, {{/if}}{{/each}}</h6>
+          <h6 class="card-subtitle mb-2">By {{#each artists as |artist|}}{{#if @last}}<a href="/artist/{{artist.id}}/" class="artist-link text-dark">{{artist.name}}</a>{{else}}<a href="/artist/{{artist.id}}/" class="artist-link text-dark">{{artist.name}}</a>, {{/if}}{{/each}}</h6>
           <p class="card-text">{{#if averageRating}}<h3>{{averageRating}}/10</h3> from {{/if}}{{numVotes}} ratings</p>
           <p class="card-text">Released {{albumInfo.releaseDate}} by {{albumInfo.label}}<p>
           <h6 class="card-subtitle mb-2">Track Listing</h6>

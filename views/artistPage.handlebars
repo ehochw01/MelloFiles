@@ -14,7 +14,7 @@
           {{/if}}
           {{#if relatedArtists}}
           <h6 class="card-subtitle mb-2">Similar Artists:</h6>
-          <p class="card-text">{{#each relatedArtists as |related|}}{{#if @last}}<a href="/artist/{{related.artistId}}" class="text-dark">{{related.name}}.</a>{{else}}<a href="/artist/{{related.artistId}}/desc" class="related-artists text-dark">{{related.name}}</a>, {{/if}}{{/each}}</p>
+          <p class="card-text">{{#each relatedArtists as |related|}}{{#if @last}}<a href="/artist/{{related.artistId}}/" class="artist-link text-dark">{{related.name}}.</a>{{else}}<a href="/artist/{{related.artistId}}/" class="artist-link text-dark">{{related.name}}</a>, {{/if}}{{/each}}</p>
           {{/if}}
           {{!-- <div class="btn-group"></div> --}}
           {{#if albums}}
@@ -23,8 +23,8 @@
                 View Albums
               </button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="/artist/{{artistID}}/asc#albums">Ascending</a>
-                <a class="dropdown-item" href="/artist/{{artistID}}/desc#albums">Descending</a>
+                <a class="dropdown-item" id="ascending" href="#">Ascending</a>
+                <a class="dropdown-item" id="descending" href="#">Descending</a>
 
               </div>
             </div>
@@ -44,7 +44,7 @@
       <h2>Albums</h2>  
       <div class="row">
         {{#each albums as |album|}}
-        <div class="col-md-4" id="{{album.albumID}}">
+        <div class="col-lg-4 col-md-6" id="{{album.albumID}}">
           <div class="card mb-4 box-shadow">
             <a href="/album/{{album.albumID}}" id="album-art">
             <img class="card-img-top" src="{{album.albumArt}}" alt="Card image cap">

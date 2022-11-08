@@ -1,3 +1,9 @@
+const artistLinks = document.querySelectorAll('.artist-link');
+var order = localStorage.getItem("albumOrder") || "desc";
+for(let i=0; i < artistLinks.length; i++) {
+  artistLinks[i].href += order;
+}
+
 const ratingSelect = document.getElementById('rating');
 const reviewForm = document.getElementById('review-form');
 const deleteBtn = document.getElementById('delete-review');
