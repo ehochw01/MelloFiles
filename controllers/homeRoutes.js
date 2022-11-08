@@ -169,7 +169,7 @@ router.get('/artist/:artist_id/:order', spotifyAuth, async (req, res) => {
 
     const responseObj = {
       name: artistData.body.name,
-      artistID: req.params.artist_id,
+      artistID: artistID,
       genres: artistData.body.genres,
       artistImage: (artistData.body.images.length > 0) ? artistData.body.images[0].url : null,
       spotifyUrl: artistData.body.external_urls.spotify,
