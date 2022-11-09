@@ -101,7 +101,8 @@ router.get('/artist/:artist_id/:order?', spotifyAuth, async (req, res) => {
     // console.log(albumHash);
     // now we have a filtered array of albums. Sort it by release year
     var albumArray = [];
-    if (req.params.order === null || req.params.order == "desc") {
+    console.log("order", req.params.order);
+    if (req.params.order === undefined || req.params.order == "desc") {
       albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(b)) - parseInt(getReleaseYear(a)));
     } else {
       albumArray = Object.values(albumHash).sort((a,b) => parseInt(getReleaseYear(a)) - parseInt(getReleaseYear(b)));
