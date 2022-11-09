@@ -56,7 +56,7 @@ router.get('/', spotifyAuth, async (req, res) => {
 // first do GET http://localhost:3001/api/spotify/search/artist_name to get the artist ID
 // http://localhost:3001/artist/artist_id
 // Receives an artist id
-router.get('/artist/:artist_id/:order', spotifyAuth, async (req, res) => {
+router.get('/artist/:artist_id/:order?', spotifyAuth, async (req, res) => {
   console.log("In the artist route");
   console.log("req.session.loggedIn:", req.session.loggedIn);
   try {

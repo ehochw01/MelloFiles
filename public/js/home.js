@@ -1,5 +1,9 @@
 const artistLinks = document.querySelectorAll('.artist-link');
-var order = localStorage.getItem("albumOrder") || "desc";
+var order = localStorage.getItem("albumOrder");
+if (order === null) {
+  order = "desc";
+  localStorage.setItem("albumOrder", "desc");
+}
 for(let i=0; i < artistLinks.length; i++) {
   artistLinks[i].href += order;
 }

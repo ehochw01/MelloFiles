@@ -1,5 +1,6 @@
 const artistLinks = document.querySelectorAll('.artist-link');
 var order = localStorage.getItem("albumOrder") || "desc";
+console.log("artistLinks", artistLinks);
 for(let i=0; i < artistLinks.length; i++) {
   artistLinks[i].href += order;
 }
@@ -8,11 +9,20 @@ const descend = document.getElementById("descending");
 console.log(window.location);
 if (order == "desc") {
   console.log("currently descending");
-  ascend.href = window.location.origin + window.location.pathname.replace("/desc", "/asc") + "#albums";
+  if(window.location.pathname.includes("/desc")) {
+    ascend.href = window.location.origin + window.location.pathname.replace("/desc", "/asc") + "#albums";
+  } else {
+    ascend.href = window.location.origin + window.location.pathname + "asc#albums";
+  }
   descend.href = "#albums";
 } else {
   console.log("currently ascending");
-  descend.href = window.location.origin + window.location.pathname.replace("/asc", "/desc") + "#albums";
+  if (window.location.pathname.includes("/asc")) {
+    descend.href = window.location.origin + window.location.pathname.replace("/asc", "/desc") + "#albums";
+  }
+  else {
+    descend.href = window.location.origin + window.location.pathname + "desc#albums";
+  }
   ascend.href = "#albums";
 }
 
