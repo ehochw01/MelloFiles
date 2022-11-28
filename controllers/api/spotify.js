@@ -16,8 +16,8 @@ router.get('/search/:artist', spotifyAuth, async (req, res) => {
     // hard coded to pick most popular result
     const searchArtistData = await spotifyApi.searchArtists(searchString, {limit: 10});
     const artists = searchArtistData.body.artists.items;
-    console.log("artists", artists);
-    console.log("Does artists[0] name match?", artists[0].name.toLowerCase() == searchString);
+    // console.log("artists", artists);
+    // console.log("Does artists[0] name match?", artists[0].name.toLowerCase() == searchString);
     var artistId = undefined;
     if (artists[0].name.toLowerCase() == searchString) {
       artistId = artists[0].id;
