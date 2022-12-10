@@ -16,7 +16,7 @@
               <img src="{{newRelease.albumArtMedium}}" class="card-img-top" alt="{{newRelease.albumTitle}} by {{newRelease.artistName}}" />
             </a>
             <div class="card-body">
-              <h5 class="card-title">{{newRelease.artistName}}</h5>
+              <a href="./artist/{{newRelease.artistID}}/" class="text-dark"><h5 class="card-title">{{newRelease.artistName}}</h5></a>
               <h6 class="card-subtitle mb-2 text-muted">{{newRelease.albumTitle}}</h6>
               <p class="card-text">Released {{newRelease.releaseDate}}</p>
               <div class="d-flex justify-content-between align-items-center">
