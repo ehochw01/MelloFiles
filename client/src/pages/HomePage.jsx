@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { getNewReleases } from '../services/musicApi';
+import { getNewReleases, getAlbumListeners } from '../services/musicApi';
 import AlbumCard from '../components/AlbumCard';
 
 const QUOTES = [
@@ -19,10 +19,47 @@ export default function HomePage() {
   const typewriterRef = useRef(null);
 
   useEffect(() => {
-    getNewReleases()
-      .then(data => setAlbums(data.slice(0, 12)))
-      .catch(() => setError('Failed to load new releases.'))
-      .finally(() => setLoading(false));
+    const loadReleases = async () => {
+      try {
+        const candidates = await getNewReleases();
+
+        if (candidates.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        let completed = 0;
+
+        const enrichAlbum = async (album) => {
+          try {
+            const { listeners } = await getAlbumListeners(album.releaseMbid);
+            const img = new Image();
+            img.src = album.coverArtUrl;
+            await img.decode();
+            setAlbums(prev => {
+              if (prev.some(a => a.mbid === album.mbid)) return prev;
+              return [...prev, { ...album, listeners }];
+            });
+          } catch {
+            // skip albums where Last.fm lookup or cover art fails
+          }
+          completed++;
+          if (completed === candidates.length) {
+            setAlbums(prev => [...prev].sort((a, b) => b.listeners - a.listeners));
+            setLoading(false);
+          }
+        };
+
+        for (const album of candidates) {
+          enrichAlbum(album);
+        }
+      } catch {
+        setError('Failed to load new releases.');
+        setLoading(false);
+      }
+    };
+
+    loadReleases();
   }, []);
 
   // Typewriter effect
@@ -49,16 +86,23 @@ export default function HomePage() {
 
       <h3 className="mb-3">New Releases</h3>
 
-      {loading && <p className="text-muted">Loading...</p>}
-      {error && <div className="alert alert-warning">{error}</div>}
+      {error && albums.length === 0 && <div className="alert alert-warning">{error}</div>}
 
-      <div className="row">
-        {albums.map(album => (
-          <div key={album.mbid} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-            <AlbumCard album={album} showArtist />
-          </div>
-        ))}
-      </div>
+      {albums.length > 0 && (
+        <div className="row album-fade-in">
+          {albums.map(album => (
+            <div key={album.mbid} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+              <AlbumCard album={album} showArtist />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {loading && (
+        <div className="d-flex justify-content-center py-4">
+          <div className="spinner-border text-light" role="status" />
+        </div>
+      )}
     </div>
   );
 }

@@ -14,3 +14,8 @@ export const getNewReleases = () =>
 
 export const getArtistImage = (mbid) =>
   axios.get(`/api/music/artist-image/${mbid}`).then(r => r.data);
+
+export const getAlbumListeners = async (releaseMbid) => {
+  const res = await axios.get(`/api/music/album-listeners/${releaseMbid}`);
+  return res.data;
+};

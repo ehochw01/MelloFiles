@@ -6,6 +6,9 @@ const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/
 
 export default function AlbumCard({ album, artistMbid, showArtist }) {
   const [imgSrc, setImgSrc] = useState(album.coverArtUrl);
+  const [hidden, setHidden] = useState(false);
+
+  if (hidden) return null;
 
   return (
     <div className="card h-100 bg-dark text-light border-secondary">
@@ -15,7 +18,7 @@ export default function AlbumCard({ album, artistMbid, showArtist }) {
           alt={album.title}
           className="card-img-top"
           style={{ objectFit: 'cover', height: '200px' }}
-          onError={() => setImgSrc(PLACEHOLDER)}
+          onError={() => showArtist ? setHidden(true) : setImgSrc(PLACEHOLDER)}
         />
       </Link>
       <div className="card-body d-flex flex-column">

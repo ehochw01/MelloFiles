@@ -169,27 +169,51 @@ router.get('/new-releases', async (req, res) => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
 
-    const url = `${MB_BASE}/release-group?type=album&limit=100&offset=0&fmt=json&query=firstreleasedate:[${dateStr}+TO+*]`;
-
-    // Use a simpler browse approach: search for recent albums
-    const searchUrl = `${MB_BASE}/release-group?query=firstreleasedate:[${dateStr}+TO+*]+AND+primarytype:album&limit=24&fmt=json`;
+    // Search releases (not release-groups) so we get release MBIDs that Last.fm recognizes
+    const searchUrl = `${MB_BASE}/release?query=date:[${dateStr}+TO+*]+AND+primarytype:album+AND+status:official&limit=100&fmt=json`;
     const data = await mbFetch(searchUrl);
 
-    const releaseGroups = data['release-groups'] || [];
-    const results = releaseGroups.slice(0, 24).map(rg => ({
-      mbid: rg.id,
-      title: cleanAlbumName(rg.title),
-      year: (rg['first-release-date'] || '').split('-')[0] || null,
-      releaseDate: rg['first-release-date'] || null,
-      coverArtUrl: `https://coverartarchive.org/release-group/${rg.id}/front`,
-      artists: (rg['artist-credit'] || [])
-        .filter(ac => ac.artist)
-        .map(ac => ({ mbid: ac.artist.id, name: ac.artist.name }))
-    }));
+    // Deduplicate by release-group ID — one entry per album concept, no extra API calls
+    const seenReleaseGroups = new Set();
+    const candidates = [];
+    for (const r of (data.releases || [])) {
+      const rg = r['release-group'];
+      if (rg && !seenReleaseGroups.has(rg.id)) {
+        seenReleaseGroups.add(rg.id);
+        candidates.push({
+          mbid: rg.id,          // release-group MBID for cover art + routing
+          releaseMbid: r.id,    // release MBID for Last.fm — direct 1-to-1, no name matching
+          title: cleanAlbumName(r.title),
+          year: (r.date || '').split('-')[0] || null,
+          releaseDate: r.date || null,
+          coverArtUrl: `https://coverartarchive.org/release-group/${rg.id}/front-250`,
+          artists: (r['artist-credit'] || [])
+            .filter(ac => ac.artist)
+            .map(ac => ({ mbid: ac.artist.id, name: ac.artist.name }))
+        });
+      }
+    }
 
-    res.status(200).json(results);
+    res.status(200).json(candidates);
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/music/album-listeners/:releaseMbid
+router.get('/album-listeners/:releaseMbid', async (req, res) => {
+  try {
+    const { releaseMbid } = req.params;
+    const LASTFM_KEY = process.env.LASTFM_API_KEY;
+    const lfUrl = `https://ws.audioscrobbler.com/2.0/?method=album.getInfo&mbid=${releaseMbid}&api_key=${LASTFM_KEY}&format=json`;
+    const lfRes = await fetch(lfUrl, { headers: { 'User-Agent': 'melloFiles/1.0' } });
+    const lfData = await lfRes.json();
+    if (lfData.error || !lfData.album) {
+      return res.status(404).json({ error: 'Not found on Last.fm' });
+    }
+    res.status(200).json({ listeners: parseInt(lfData.album.listeners || '0', 10) });
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
