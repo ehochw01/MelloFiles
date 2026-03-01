@@ -20,18 +20,18 @@ function cleanTrackName(track) {
 function deduplicateAlbums(releaseGroups) {
   const albumHash = {};
   for (const rg of releaseGroups) {
-    let name = rg.title.toLowerCase();
-    if (name.includes('commentary') || name.includes('karaoke')) continue;
+    const nameLower = rg.title.toLowerCase();
+    if (!nameLower.includes('commentary') && !nameLower.includes('karaoke')) {
+      let name = rg.title.replace('The ', '');
+      name = name.replace('?', '');
+      const cleanName = cleanAlbumName(name).toLowerCase();
 
-    name = rg.title.replace('The ', '');
-    name = name.replace('?', '');
-    const cleanName = cleanAlbumName(name).toLowerCase();
-
-    const trackCount = rg['release-count'] || 0;
-    if (albumHash[cleanName] === undefined) {
-      albumHash[cleanName] = rg;
-    } else if (trackCount < (albumHash[cleanName]['release-count'] || 0)) {
-      albumHash[cleanName] = rg;
+      const trackCount = rg['release-count'] || 0;
+      if (albumHash[cleanName] === undefined) {
+        albumHash[cleanName] = rg;
+      } else if (trackCount < (albumHash[cleanName]['release-count'] || 0)) {
+        albumHash[cleanName] = rg;
+      }
     }
   }
   return Object.values(albumHash);
