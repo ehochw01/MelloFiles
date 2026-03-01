@@ -4,6 +4,24 @@ const { mbFetch } = require('../../utils/mbFetch');
 const MB_BASE = 'https://musicbrainz.org/ws/2';
 const PLACEHOLDER_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23333"/><text x="150" y="160" font-family="sans-serif" font-size="80" fill="%23999" text-anchor="middle">♪</text></svg>';
 
+// --- Spotify token cache ---
+let spotifyToken = null;
+let spotifyTokenExpiry = 0;
+
+async function getSpotifyToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpiry) return spotifyToken;
+  const creds = Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64');
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=client_credentials'
+  });
+  const data = await res.json();
+  spotifyToken = data.access_token;
+  spotifyTokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+  return spotifyToken;
+}
+
 // --- Helpers ---
 
 function cleanAlbumName(name) {
@@ -73,7 +91,7 @@ router.get('/artist/:mbid', async (req, res) => {
 
     // Filter to albums only, deduplicate, sort desc by year
     const releaseGroups = (data['release-groups'] || []).filter(
-      rg => rg['primary-type'] === 'Album'
+      rg => rg['primary-type'] === 'Album' && !(rg['secondary-types'] || []).includes('Live')
     );
     const deduped = deduplicateAlbums(releaseGroups);
     const sorted = deduped.sort(
@@ -90,7 +108,7 @@ router.get('/artist/:mbid', async (req, res) => {
     res.status(200).json({
       mbid: data.id,
       name: data.name,
-      genres: (data.genres || data.tags || []).slice(0, 8).map(g => g.name),
+      genres: (data.genres || data.tags || []).sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 5).map(g => g.name),
       urlRels: (data.relations || []).filter(r => r['target-type'] === 'url').map(r => ({
         type: r.type,
         url: r.url && r.url.resource
@@ -219,46 +237,58 @@ router.get('/album-listeners/:releaseMbid', async (req, res) => {
 });
 
 // GET /api/music/artist-image/:mbid
-// Fetches artist image URL via Wikipedia page image API
+// Tries Spotify → Wikipedia → Wikimedia Commons
 router.get('/artist-image/:mbid', async (req, res) => {
   try {
     const { mbid } = req.params;
     const artistUrl = `${MB_BASE}/artist/${mbid}?inc=url-rels&fmt=json`;
     const artistData = await mbFetch(artistUrl);
-
     const relations = artistData.relations || [];
-    const wikiRel = relations.find(
-      r => r.type === 'wikipedia' && r.url && r.url.resource
-    );
 
-    if (!wikiRel) {
-      return res.status(200).json({ imageUrl: null });
+    // 1. Try Spotify — use Spotify URL from MusicBrainz url-rels (no name matching)
+    const spotifyRel = relations.find(r => r.url && r.url.resource && r.url.resource.includes('open.spotify.com/artist/'));
+    if (spotifyRel) {
+      const spotifyId = spotifyRel.url.resource.split('open.spotify.com/artist/')[1];
+      const token = await getSpotifyToken();
+      const spotifyRes = await fetch(`https://api.spotify.com/v1/artists/${spotifyId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const spotifyData = await spotifyRes.json();
+      if (spotifyData.images && spotifyData.images.length > 0) {
+        return res.status(200).json({ imageUrl: spotifyData.images[0].url });
+      }
     }
 
-    // Extract Wikipedia page title from URL
-    const wikiUrl = wikiRel.url.resource;
-    const titleMatch = wikiUrl.match(/\/wiki\/(.+)$/);
-    if (!titleMatch) {
-      return res.status(200).json({ imageUrl: null });
+    // 2. Try Wikipedia page thumbnail
+    const wikiRel = relations.find(r => r.type === 'wikipedia' && r.url && r.url.resource);
+    if (wikiRel) {
+      const titleMatch = wikiRel.url.resource.match(/\/wiki\/(.+)$/);
+      if (titleMatch) {
+        const pageTitle = decodeURIComponent(titleMatch[1]);
+        const wikiResponse = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`, { headers: { 'User-Agent': 'melloFiles/1.0' } });
+        if (wikiResponse.ok) {
+          const wikiData = await wikiResponse.json();
+          if (wikiData.thumbnail && wikiData.thumbnail.source) {
+            const imageUrl = wikiData.thumbnail.source.replace(/\/\d+px-/, '/400px-');
+            return res.status(200).json({ imageUrl });
+          }
+        }
+      }
     }
 
-    const pageTitle = decodeURIComponent(titleMatch[1]);
-    const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`;
-
-    const wikiResponse = await fetch(wikiApiUrl, {
-      headers: { 'User-Agent': 'melloFiles/1.0' }
-    });
-
-    if (!wikiResponse.ok) {
-      return res.status(200).json({ imageUrl: null });
+    // 3. Try Wikimedia Commons direct image link
+    const imageRel = relations.find(r => r.type === 'image' && r.url && r.url.resource);
+    if (imageRel) {
+      const fileName = imageRel.url.resource.split('/wiki/')[1];
+      const commonsResponse = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&titles=${fileName}&prop=imageinfo&iiprop=url&format=json&origin=*`, { headers: { 'User-Agent': 'melloFiles/1.0' } });
+      const commonsData = await commonsResponse.json();
+      const pages = commonsData.query && commonsData.query.pages;
+      const page = pages && Object.values(pages)[0];
+      const imageUrl = page && page.imageinfo && page.imageinfo[0] && page.imageinfo[0].url;
+      if (imageUrl) return res.status(200).json({ imageUrl });
     }
 
-    const wikiData = await wikiResponse.json();
-    const imageUrl = wikiData.thumbnail && wikiData.thumbnail.source
-      ? wikiData.thumbnail.source.replace(/\/\d+px-/, '/400px-')
-      : null;
-
-    res.status(200).json({ imageUrl });
+    res.status(200).json({ imageUrl: null });
   } catch (err) {
     console.error(err);
     res.status(200).json({ imageUrl: null });
