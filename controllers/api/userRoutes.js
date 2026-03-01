@@ -1,6 +1,19 @@
 const router = require('express').Router();
 const { User } = require('../../models');
 
+// GET /api/users/me
+// Returns current session state for AuthContext hydration
+router.get('/me', (req, res) => {
+  if (req.session.loggedIn) {
+    res.status(200).json({
+      loggedIn: true,
+      userId: req.session.userID
+    });
+  } else {
+    res.status(200).json({ loggedIn: false });
+  }
+});
+
 // CREATE new user
 router.post('/', async (req, res) => {
   try {
