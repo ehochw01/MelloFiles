@@ -3,28 +3,36 @@ import { useParams } from 'react-router-dom';
 import { getArtist, getArtistImage } from '../services/musicApi';
 import AlbumCard from '../components/AlbumCard';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import { useStore } from '../store';
 import type { ArtistDetail } from '../types';
 
 export default function ArtistPage() {
   const { mbid } = useParams<{ mbid: string }>();
-  const [artist, setArtist] = useState<ArtistDetail | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { artists, artistImages, setArtist, setArtistImage } = useStore();
+
+  const [artist, setArtistState] = useState<ArtistDetail | null>(artists[mbid!] || null);
+  const [imageUrl, setImageUrl] = useState<string | null>(mbid! in artistImages ? artistImages[mbid!] : null);
+  const [loading, setLoading] = useState(!artists[mbid!]);
   const [error, setError] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
     () => (localStorage.getItem('albumSortOrder') as 'asc' | 'desc') || 'desc'
   );
 
   useEffect(() => {
+    if (artists[mbid!]) return;
+
     setLoading(true);
     setError('');
     getArtist(mbid!)
       .then(data => {
-        setArtist(data);
+        setArtistState(data);
+        setArtist(mbid!, data);
         return getArtistImage(mbid!);
       })
       .then(imgData => {
-        if (imgData && imgData.imageUrl) setImageUrl(imgData.imageUrl);
+        const url = imgData?.imageUrl ?? null;
+        setImageUrl(url);
+        setArtistImage(mbid!, url);
       })
       .catch(() => setError('Failed to load artist.'))
       .finally(() => setLoading(false));

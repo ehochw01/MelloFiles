@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getMe, login as apiLogin, signup as apiSignup, logout as apiLogout } from '../services/userApi';
+import { useStore } from '../store';
 import type { User } from '../types';
 
 type AuthContextType = {
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function logout() {
     await apiLogout();
+    useStore.getState().clearUserRatings();
     setUser({ loggedIn: false });
   }
 

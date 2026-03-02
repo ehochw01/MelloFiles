@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { getNewReleases, getAlbumListeners } from '../services/musicApi';
 import AlbumCard from '../components/AlbumCard';
+import { useStore } from '../store';
 import type { NewRelease } from '../types';
 
 const QUOTES = [
@@ -13,13 +14,16 @@ const QUOTES = [
 ];
 
 export default function HomePage() {
-  const [albums, setAlbums] = useState<NewRelease[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { newReleases, newReleasesLoaded, setNewReleases } = useStore();
+  const [albums, setAlbums] = useState<NewRelease[]>(newReleases);
+  const [loading, setLoading] = useState(!newReleasesLoaded);
   const [error, setError] = useState('');
   const [displayed, setDisplayed] = useState('');
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    if (newReleasesLoaded) return;
+
     const loadReleases = async () => {
       try {
         const candidates = await getNewReleases();
@@ -46,7 +50,11 @@ export default function HomePage() {
           }
           completed++;
           if (completed === candidates.length) {
-            setAlbums(prev => [...prev].sort((a, b) => (b.listeners ?? 0) - (a.listeners ?? 0)));
+            setAlbums(prev => {
+              const sorted = [...prev].sort((a, b) => (b.listeners ?? 0) - (a.listeners ?? 0));
+              setNewReleases(sorted);
+              return sorted;
+            });
             setLoading(false);
           }
         };

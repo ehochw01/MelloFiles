@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getAlbum } from '../services/musicApi';
-import { getAverageRating, getReviews, getUserReview } from '../services/ratingApi';
+import { getAverageRating, getReviews, getUserRating, getUserReview } from '../services/ratingApi';
 import { useAuth } from '../context/AuthContext';
+import { useStore } from '../store';
 import RatingDropdown from '../components/RatingDropdown';
 import ReviewList from '../components/ReviewList';
 import ReviewForm from '../components/ReviewForm';
@@ -12,32 +13,45 @@ import type { AlbumDetail, Review, UserReview } from '../types';
 export default function AlbumPage() {
   const { mbid } = useParams<{ mbid: string }>();
   const { user } = useAuth();
-  const [album, setAlbum] = useState<AlbumDetail | null>(null);
-  const [avgRating, setAvgRating] = useState<number | null>(null);
+  const { albumDetails, avgRatings, setAlbumDetail, setAvgRating, setUserRating } = useStore();
+
+  const cachedAlbum = albumDetails[mbid!] || null;
+  const [album, setAlbum] = useState<AlbumDetail | null>(cachedAlbum);
+  const [avgRating, setAvgRatingState] = useState<number | null>(mbid! in avgRatings ? avgRatings[mbid!] : null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [userReview, setUserReview] = useState<UserReview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!cachedAlbum);
   const [error, setError] = useState('');
-  const [imgSrc, setImgSrc] = useState('');
+  const [imgSrc, setImgSrc] = useState(cachedAlbum?.coverArtUrl || '');
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      getAlbum(mbid!),
-      getAverageRating(mbid!).catch(() => null),
-      getReviews(mbid!).catch(() => []),
-    ]).then(([albumData, avg, reviewData]) => {
-      setAlbum(albumData);
-      setImgSrc(albumData.coverArtUrl);
-      setAvgRating(avg);
-      setReviews(reviewData);
-    }).catch(() => setError('Failed to load album.'))
-      .finally(() => setLoading(false));
+    const fetchAlbum = !albumDetails[mbid!];
+    const fetchAvg = !(mbid! in avgRatings);
+
+    if (fetchAlbum || fetchAvg) {
+      setLoading(true);
+      Promise.all([
+        fetchAlbum ? getAlbum(mbid!) : Promise.resolve(albumDetails[mbid!]),
+        fetchAvg ? getAverageRating(mbid!).catch(() => null) : Promise.resolve(avgRatings[mbid!]),
+        getReviews(mbid!).catch(() => []),
+      ]).then(([albumData, avg, reviewData]) => {
+        setAlbum(albumData);
+        setImgSrc(albumData.coverArtUrl);
+        setAvgRatingState(avg);
+        setReviews(reviewData);
+        if (fetchAlbum) setAlbumDetail(mbid!, albumData);
+        if (fetchAvg) setAvgRating(mbid!, avg);
+      }).catch(() => setError('Failed to load album.'))
+        .finally(() => setLoading(false));
+    } else {
+      getReviews(mbid!).catch(() => []).then(data => setReviews(data));
+    }
   }, [mbid]);
 
   useEffect(() => {
     if (user && user.loggedIn) {
       getUserReview(mbid!).catch(() => null).then(r => setUserReview(r));
+      getUserRating(mbid!).catch(() => null).then(r => setUserRating(mbid!, r));
     }
   }, [mbid, user]);
 
