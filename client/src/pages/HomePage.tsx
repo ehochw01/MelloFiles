@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { getNewReleases, getAlbumListeners } from '../services/musicApi';
 import AlbumCard from '../components/AlbumCard';
+import type { NewRelease } from '../types';
 
 const QUOTES = [
+  '"Writing about music is like dancing about architecture" — Unknown',
   '"Without music, life would be a mistake." — Nietzsche',
   '"Music gives a soul to the universe." — Plato',
   '"One good thing about music, when it hits you, you feel no pain." — Bob Marley',
@@ -11,12 +13,11 @@ const QUOTES = [
 ];
 
 export default function HomePage() {
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState<NewRelease[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [quote, setQuote] = useState('');
   const [displayed, setDisplayed] = useState('');
-  const typewriterRef = useRef(null);
+  const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const loadReleases = async () => {
@@ -30,7 +31,7 @@ export default function HomePage() {
 
         let completed = 0;
 
-        const enrichAlbum = async (album) => {
+        const enrichAlbum = async (album: NewRelease) => {
           try {
             const { listeners } = await getAlbumListeners(album.releaseMbid);
             const img = new Image();
@@ -45,7 +46,7 @@ export default function HomePage() {
           }
           completed++;
           if (completed === candidates.length) {
-            setAlbums(prev => [...prev].sort((a, b) => b.listeners - a.listeners));
+            setAlbums(prev => [...prev].sort((a, b) => (b.listeners ?? 0) - (a.listeners ?? 0)));
             setLoading(false);
           }
         };
@@ -62,19 +63,17 @@ export default function HomePage() {
     loadReleases();
   }, []);
 
-  // Typewriter effect
   useEffect(() => {
     const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-    setQuote(randomQuote);
     setDisplayed('');
     let i = 0;
-    clearInterval(typewriterRef.current);
+    if (typewriterRef.current) clearInterval(typewriterRef.current);
     typewriterRef.current = setInterval(() => {
       i++;
       setDisplayed(randomQuote.slice(0, i));
-      if (i >= randomQuote.length) clearInterval(typewriterRef.current);
+      if (i >= randomQuote.length && typewriterRef.current) clearInterval(typewriterRef.current);
     }, 40);
-    return () => clearInterval(typewriterRef.current);
+    return () => { if (typewriterRef.current) clearInterval(typewriterRef.current); };
   }, []);
 
   return (

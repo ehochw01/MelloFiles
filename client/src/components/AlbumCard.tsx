@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import RatingDropdown from './RatingDropdown';
+import { PLACEHOLDER_IMAGE } from '../constants';
+import type { Album, NewRelease } from '../types';
 
-const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='300' height='300' fill='%23333'/><text x='150' y='160' font-family='sans-serif' font-size='80' fill='%23999' text-anchor='middle'>%E2%99%AA</text></svg>";
+type AlbumCardProps = {
+  album: (Album | NewRelease) & { averageRating?: number; userRating?: number };
+  artistMbid?: string;
+  showArtist?: boolean;
+};
 
-export default function AlbumCard({ album, artistMbid, showArtist }) {
+export default function AlbumCard({ album, artistMbid, showArtist }: AlbumCardProps) {
   const [imgSrc, setImgSrc] = useState(album.coverArtUrl);
   const [hidden, setHidden] = useState(false);
 
@@ -18,7 +24,7 @@ export default function AlbumCard({ album, artistMbid, showArtist }) {
           alt={album.title}
           className="card-img-top"
           style={{ objectFit: 'cover', height: '200px' }}
-          onError={() => showArtist ? setHidden(true) : setImgSrc(PLACEHOLDER)}
+          onError={() => showArtist ? setHidden(true) : setImgSrc(PLACEHOLDER_IMAGE)}
         />
       </Link>
       <div className="card-body d-flex flex-column">

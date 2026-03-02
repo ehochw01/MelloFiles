@@ -1,10 +1,16 @@
 import { useAuth } from '../context/AuthContext';
 import { deleteReview } from '../services/ratingApi';
+import type { Review } from '../types';
 
-export default function ReviewList({ reviews, onDelete }) {
+type ReviewListProps = {
+  reviews: Review[];
+  onDelete?: (ratingId: number) => void;
+};
+
+export default function ReviewList({ reviews, onDelete }: ReviewListProps) {
   const { user } = useAuth();
 
-  async function handleDelete(ratingId) {
+  async function handleDelete(ratingId: number) {
     if (!window.confirm('Delete your review?')) return;
     try {
       await deleteReview(ratingId);
@@ -26,13 +32,13 @@ export default function ReviewList({ reviews, onDelete }) {
             <div className="d-flex justify-content-between align-items-start">
               <div>
                 <strong className="text-light">
-                  {review.User ? review.User.username : 'Unknown'}
+                  {review.user ? review.user.username : 'Unknown'}
                 </strong>
                 {review.score && (
                   <span className="badge badge-secondary ml-2">{review.score}/10</span>
                 )}
               </div>
-              {user && user.loggedIn && review.User && review.User.user_id === user.userId && (
+              {user && user.loggedIn && review.user && review.user.user_id === user.userId && (
                 <button
                   className="btn btn-sm btn-outline-danger"
                   onClick={() => handleDelete(review.rating_id)}

@@ -32,7 +32,13 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: 'An account with that email already exists.' });
+    }
+    if (err.name === 'SequelizeValidationError') {
+      return res.status(400).json({ message: err.errors[0].message });
+    }
+    res.status(500).json({ message: 'Signup failed. Please try again.' });
   }
 });
 

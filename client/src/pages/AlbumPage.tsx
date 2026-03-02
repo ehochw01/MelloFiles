@@ -6,16 +6,16 @@ import { useAuth } from '../context/AuthContext';
 import RatingDropdown from '../components/RatingDropdown';
 import ReviewList from '../components/ReviewList';
 import ReviewForm from '../components/ReviewForm';
-
-const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='300' height='300' fill='%23333'/><text x='150' y='160' font-family='sans-serif' font-size='80' fill='%23999' text-anchor='middle'>%E2%99%AA</text></svg>";
+import { PLACEHOLDER_IMAGE } from '../constants';
+import type { AlbumDetail, Review, UserReview } from '../types';
 
 export default function AlbumPage() {
-  const { mbid } = useParams();
+  const { mbid } = useParams<{ mbid: string }>();
   const { user } = useAuth();
-  const [album, setAlbum] = useState(null);
-  const [avgRating, setAvgRating] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [userReview, setUserReview] = useState(null);
+  const [album, setAlbum] = useState<AlbumDetail | null>(null);
+  const [avgRating, setAvgRating] = useState<number | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<UserReview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [imgSrc, setImgSrc] = useState('');
@@ -23,9 +23,9 @@ export default function AlbumPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      getAlbum(mbid),
-      getAverageRating(mbid).catch(() => null),
-      getReviews(mbid).catch(() => []),
+      getAlbum(mbid!),
+      getAverageRating(mbid!).catch(() => null),
+      getReviews(mbid!).catch(() => []),
     ]).then(([albumData, avg, reviewData]) => {
       setAlbum(albumData);
       setImgSrc(albumData.coverArtUrl);
@@ -37,29 +37,18 @@ export default function AlbumPage() {
 
   useEffect(() => {
     if (user && user.loggedIn) {
-      getUserReview(mbid).catch(() => null).then(r => setUserReview(r));
+      getUserReview(mbid!).catch(() => null).then(r => setUserReview(r));
     }
   }, [mbid, user]);
 
-  // Apply pending rating after login
-  useEffect(() => {
-    const pending = sessionStorage.getItem('pendingRating');
-    if (pending && user && user.loggedIn) {
-      const { albumMbid } = JSON.parse(pending);
-      if (albumMbid === mbid) {
-        sessionStorage.removeItem('pendingRating');
-      }
-    }
-  }, [user, mbid]);
-
-  function handleReviewSaved(result) {
-    getReviews(mbid).then(data => setReviews(data)).catch(() => {});
+  function handleReviewSaved() {
+    getReviews(mbid!).then(data => setReviews(data)).catch(() => {});
     if (user && user.loggedIn) {
-      getUserReview(mbid).catch(() => null).then(r => setUserReview(r));
+      getUserReview(mbid!).catch(() => null).then(r => setUserReview(r));
     }
   }
 
-  function handleReviewDeleted(ratingId) {
+  function handleReviewDeleted(ratingId: number) {
     setReviews(prev => prev.filter(r => r.rating_id !== ratingId));
     setUserReview(null);
   }
@@ -79,7 +68,7 @@ export default function AlbumPage() {
             alt={album.title}
             className="img-fluid rounded mb-3"
             style={{ maxWidth: '250px' }}
-            onError={() => setImgSrc(PLACEHOLDER)}
+            onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
           />
         </div>
         <div className="col-md-9">
@@ -104,7 +93,7 @@ export default function AlbumPage() {
             )}
           </div>
           <div style={{ maxWidth: '200px' }}>
-            <RatingDropdown albumMbid={mbid} artistMbid={artistMbid} />
+            <RatingDropdown albumMbid={mbid!} artistMbid={artistMbid} />
           </div>
         </div>
       </div>
@@ -125,7 +114,7 @@ export default function AlbumPage() {
           <h4>Reviews</h4>
           {user && user.loggedIn && (
             <ReviewForm
-              albumMbid={mbid}
+              albumMbid={mbid!}
               artistMbid={artistMbid}
               existingReview={userReview}
               onSaved={handleReviewSaved}

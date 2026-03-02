@@ -1,15 +1,24 @@
 import { useState } from 'react';
 import { createReview, updateReview } from '../services/ratingApi';
+import { RATING_LABELS } from '../constants';
+import type { UserReview } from '../types';
 
-export default function ReviewForm({ albumMbid, artistMbid, existingReview, onSaved }) {
+type ReviewFormProps = {
+  albumMbid: string;
+  artistMbid: string | null;
+  existingReview?: UserReview | null;
+  onSaved?: () => void;
+};
+
+export default function ReviewForm({ albumMbid, artistMbid, existingReview, onSaved }: ReviewFormProps) {
   const [text, setText] = useState(existingReview ? existingReview.review || '' : '');
-  const [score, setScore] = useState(existingReview ? existingReview.score || '' : '');
+  const [score, setScore] = useState<number | ''>(existingReview ? existingReview.score ?? '' : '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const isEdit = existingReview && existingReview.rating_id;
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!text.trim()) {
       setError('Review text is required.');
@@ -18,21 +27,20 @@ export default function ReviewForm({ albumMbid, artistMbid, existingReview, onSa
     setSaving(true);
     setError('');
     try {
-      let result;
       if (isEdit) {
-        result = await updateReview(existingReview.rating_id, {
+        await updateReview(existingReview.rating_id, {
           review: text,
-          score: score ? parseInt(score) : undefined
+          score: score !== '' ? score : undefined
         });
       } else {
-        result = await createReview({
+        await createReview({
           album_id: albumMbid,
-          artist_id: artistMbid,
-          score: score ? parseInt(score) : null,
+          artist_id: artistMbid ?? '',
+          score: score !== '' ? score : null,
           review: text
         });
       }
-      if (onSaved) onSaved(result);
+      if (onSaved) onSaved();
       if (!isEdit) setText('');
     } catch (err) {
       setError('Failed to save review. Please try again.');
@@ -50,11 +58,11 @@ export default function ReviewForm({ albumMbid, artistMbid, existingReview, onSa
         <select
           className="form-control bg-dark text-light border-secondary mb-2"
           value={score}
-          onChange={e => setScore(e.target.value)}
+          onChange={e => setScore(e.target.value !== '' ? parseInt(e.target.value) : '')}
         >
           <option value="">Score (optional)</option>
-          {[10,9,8,7,6,5,4,3,2,1].map(n => (
-            <option key={n} value={n}>{n}/10</option>
+          {RATING_LABELS.map(([n, label]) => (
+            <option key={n} value={n}>{n} — {label}</option>
           ))}
         </select>
         <textarea

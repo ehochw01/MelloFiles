@@ -10,7 +10,7 @@ export default function Navbar() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  async function handleSearch(e) {
+  async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
     setSearching(true);

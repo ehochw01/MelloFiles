@@ -2,26 +2,26 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getArtist, getArtistImage } from '../services/musicApi';
 import AlbumCard from '../components/AlbumCard';
-
-const PLACEHOLDER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><rect width='300' height='300' fill='%23333'/><text x='150' y='160' font-family='sans-serif' font-size='80' fill='%23999' text-anchor='middle'>%E2%99%AA</text></svg>";
+import { PLACEHOLDER_IMAGE } from '../constants';
+import type { ArtistDetail } from '../types';
 
 export default function ArtistPage() {
-  const { mbid } = useParams();
-  const [artist, setArtist] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
+  const { mbid } = useParams<{ mbid: string }>();
+  const [artist, setArtist] = useState<ArtistDetail | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sortOrder, setSortOrder] = useState(
-    () => localStorage.getItem('albumSortOrder') || 'desc'
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
+    () => (localStorage.getItem('albumSortOrder') as 'asc' | 'desc') || 'desc'
   );
 
   useEffect(() => {
     setLoading(true);
     setError('');
-    getArtist(mbid)
+    getArtist(mbid!)
       .then(data => {
         setArtist(data);
-        return getArtistImage(mbid);
+        return getArtistImage(mbid!);
       })
       .then(imgData => {
         if (imgData && imgData.imageUrl) setImageUrl(imgData.imageUrl);
@@ -30,14 +30,14 @@ export default function ArtistPage() {
       .finally(() => setLoading(false));
   }, [mbid]);
 
-  function handleSortChange(order) {
+  function handleSortChange(order: 'asc' | 'desc') {
     setSortOrder(order);
     localStorage.setItem('albumSortOrder', order);
   }
 
   const sortedAlbums = artist ? [...artist.albums].sort((a, b) => {
-    const ya = parseInt(a.year || 0);
-    const yb = parseInt(b.year || 0);
+    const ya = parseInt(a.year || '0');
+    const yb = parseInt(b.year || '0');
     return sortOrder === 'desc' ? yb - ya : ya - yb;
   }) : [];
 
@@ -50,11 +50,11 @@ export default function ArtistPage() {
       <div className="row mb-4 align-items-center">
         <div className="col-auto">
           <img
-            src={imageUrl || PLACEHOLDER}
+            src={imageUrl || PLACEHOLDER_IMAGE}
             alt={artist.name}
             className="rounded"
             style={{ width: '160px', height: '160px', objectFit: 'cover' }}
-            onError={e => { e.target.src = PLACEHOLDER; }}
+            onError={e => { (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE; }}
           />
         </div>
         <div className="col">
